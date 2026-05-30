@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>六月周边游 · 行程单</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --c-pink: #EDAFB8;
+    --c-peach: #F9E4D4;
+    --c-warm: #E8E4DC;
+    --c-sage: #8FAF8F;
+    --c-dark: #2F4644;
+    --glass-bg: rgba(255,255,255,0.88);
+    --glass-border: rgba(47,70,68,0.10);
+    --text-primary: #1a2e2c;
+    --text-secondary: rgba(30,50,46,0.72);
+    --accent: #5a8f6e;
+    --g1: #2F4644;
+  }
+
+  body {
+    min-height: 100vh;
+    background:
+      radial-gradient(ellipse at 15% 5%, #fde8ec 0%, transparent 35%),
+      radial-gradient(ellipse at 88% 88%, #deeede 0%, transparent 35%),
+      #faf8f6;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-primary);
+    overflow-x: hidden;
+  }
+
+  .blob { position: fixed; border-radius: 50%; filter: blur(100px); opacity: 0.14; animation: float 12s ease-in-out infinite; pointer-events: none; z-index: 0; }
+  .blob-1 { width: 500px; height: 500px; background: #EDAFB8; top: -120px; left: -100px; }
+  .blob-2 { width: 400px; height: 400px; background: #8FAF8F; top: 40%; right: -80px; animation-delay: 4s; }
+  .blob-3 { width: 350px; height: 350px; background: #F9E4D4; bottom: 5%; left: 20%; animation-delay: 8s; }
+  @keyframes float {
+    0%,100% { transform: translate(0,0) scale(1); }
+    33% { transform: translate(20px,-30px) scale(1.05); }
+    66% { transform: translate(-15px,20px) scale(0.97); }
+  }
+
+  .container { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; padding: 40px 20px 60px; }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: 36px; }
+  .header-tag { display: inline-block; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); background: rgba(143,175,143,0.15); border: 1px solid rgba(143,175,143,0.35); padding: 5px 14px; border-radius: 20px; margin-bottom: 16px; }
+  .header h1 { font-family: 'Noto Serif SC', serif; font-weight: 300; font-size: 32px; letter-spacing: 8px; color: var(--text-primary); margin-bottom: 6px; }
+  .header .subtitle { font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px; color: var(--text-secondary); }
+  .divider { width: 60px; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); margin: 16px auto; }
+
+  /* Date banner */
+  .date-banner { display: flex; align-items: center; justify-content: center; gap: 16px; background: rgba(255,255,255,0.92); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 16px 24px; margin-bottom: 28px; box-shadow: 0 4px 20px rgba(47,70,68,0.08); }
+  .date-point { text-align: center; }
+  .date-point .day { font-size: 28px; font-weight: 300; color: var(--accent); line-height: 1; }
+  .date-point .month { font-size: 11px; letter-spacing: 2px; color: var(--text-secondary); margin-top: 3px; }
+  .date-arrow { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; }
+  .arrow-wrap { width: 100%; display: flex; align-items: center; }
+  .arrow-line { flex: 1; height: 2px; background: linear-gradient(90deg, var(--c-pink), var(--accent)); }
+  .arrow-head { font-size: 9px; color: var(--accent); line-height: 1; margin-left: 1px; }
+  .nights-badge { background: rgba(143,175,143,0.15); border: 1px solid rgba(143,175,143,0.35); border-radius: 20px; padding: 4px 14px; font-size: 12px; color: var(--g1); letter-spacing: 1px; font-weight: 500; }
+
+  /* Section label */
+  .section-label { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; margin-top: 28px; }
+  .section-label span { font-size: 13px; letter-spacing: 2px; color: var(--g1); font-weight: 600; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--glass-border), transparent); }
+
+  /* Glass card */
+  .glass-card { background: var(--glass-bg); backdrop-filter: blur(24px); border: 1px solid var(--glass-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 10px; position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(47,70,68,0.08), 0 1px 4px rgba(47,70,68,0.05); }
+  .glass-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(168,230,195,0.3), transparent); }
+
+  /* Train card */
+  .train-card { background: rgba(255,255,255,0.92); }
+  .train-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .train-icon { width: 36px; height: 36px; background: rgba(143,175,143,0.15); border: 1px solid var(--glass-border); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .train-info { flex: 1; }
+  .train-info .label { font-size: 10px; letter-spacing: 2px; color: var(--g1); opacity: 0.65; text-transform: uppercase; font-weight: 500; }
+  .train-info .value { font-family: 'Noto Serif SC', serif; font-size: 18px; color: var(--text-primary); margin-top: 2px; font-weight: 400; }
+  .direction-badge { font-size: 10px; padding: 4px 12px; border-radius: 20px; letter-spacing: 1px; background: rgba(143,175,143,0.15); color: var(--g1); border: 1px solid rgba(143,175,143,0.35); font-weight: 500; }
+  .time-row { display: flex; align-items: center; gap: 12px; }
+  .time-block { text-align: center; }
+  .time-block .time { font-size: 30px; font-weight: 300; color: var(--text-primary); letter-spacing: 1px; }
+  .time-block .date-small { font-size: 11px; color: rgba(30,50,46,0.65); margin-top: 2px; font-weight: 500; }
+  .time-track { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .track-line { width: 100%; height: 2px; background: linear-gradient(90deg, var(--c-pink), var(--accent)); border-radius: 2px; position: relative; }
+  .track-line::before,.track-line::after { content: ''; position: absolute; top: 50%; transform: translateY(-50%); width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  .track-line::before { left: -3px; }
+  .track-line::after { right: -3px; }
+  .duration { font-size: 10px; color: var(--accent); letter-spacing: 1px; }
+
+  /* Day group */
+  .day-group { margin-bottom: 22px; }
+  .day-header { display: flex; align-items: center; gap: 12px; padding: 6px 4px 12px; cursor: pointer; user-select: none; border-bottom: 1.5px solid rgba(143,175,143,0.30); margin-bottom: 12px; transition: all 0.2s; }
+  .day-header:active { opacity: 0.7; }
+  .day-num { display: flex; align-items: baseline; gap: 4px; flex-shrink: 0; }
+  .day-num .d { font-family: 'Noto Serif SC', serif; font-size: 30px; font-weight: 600; color: var(--g1); line-height: 1; }
+  .day-num .m { font-size: 11px; letter-spacing: 1px; color: var(--accent); font-weight: 600; }
+  .day-title { flex: 1; }
+  .day-title .dt-main { font-family: 'Noto Serif SC', serif; font-size: 14px; color: var(--text-primary); font-weight: 600; }
+  .day-title .dt-sub { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+  .day-count { font-size: 11px; color: var(--accent); background: rgba(143,175,143,0.15); border: 1px solid rgba(143,175,143,0.3); border-radius: 20px; padding: 3px 9px; font-weight: 500; margin-right: 2px; }
+  .day-chevron { width: 18px; height: 18px; position: relative; flex-shrink: 0; transition: transform 0.3s ease; }
+  .day-chevron::before { content: ''; position: absolute; top: 3px; left: 4px; width: 8px; height: 8px; border-right: 2px solid var(--accent); border-bottom: 2px solid var(--accent); transform: rotate(45deg); }
+  .day-group.collapsed .day-chevron { transform: rotate(-90deg); }
+  .day-body { overflow: hidden; transition: max-height 0.35s ease, opacity 0.3s ease; max-height: 3000px; opacity: 1; padding-left: 6px; }
+  .day-group.collapsed .day-body { max-height: 0; opacity: 0; }
+
+  /* Activity card */
+  .activity-card { display: flex; gap: 12px; align-items: center; padding-right: 36px; }
+  .activity-icon { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; border: 1px solid var(--glass-border); }
+  .icon-green { background: rgba(143,175,143,0.15); }
+  .icon-pink { background: rgba(237,175,184,0.18); }
+  .icon-peach { background: rgba(249,228,212,0.50); }
+  .activity-content { flex: 1; }
+  .act-title { font-family: 'Noto Serif SC', serif; font-size: 16px; color: var(--text-primary); margin-bottom: 3px; font-weight: 400; }
+  .act-desc { font-size: 12px; color: rgba(30,50,46,0.65); line-height: 1.5; }
+  .act-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; align-items: center; }
+  .time-tag { font-size: 10px; color: var(--g1); background: rgba(143,175,143,0.15); border: 1px solid rgba(143,175,143,0.35); padding: 3px 10px; border-radius: 20px; display: inline-block; letter-spacing: 1px; font-weight: 500; }
+  .ticket-tag { font-size: 11px; color: var(--g1); background: rgba(237,175,184,0.20); border: 1px solid rgba(237,175,184,0.45); padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+  .ticket-tag.alt { background: rgba(232,228,220,0.50); border: 1px solid rgba(47,70,68,0.15); color: var(--text-secondary); }
+
+  /* Checkbox */
+  .card-check { display: none; }
+  .check-label { position: absolute; top: 50%; right: 16px; transform: translateY(-50%); width: 24px; height: 24px; border-radius: 50%; border: 2px solid rgba(143,175,143,0.5); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.25s ease; background: white; flex-shrink: 0; }
+  .check-label::after { content: ''; opacity: 0; transition: all 0.2s ease; width: 6px; height: 10px; border-right: 2.5px solid white; border-bottom: 2.5px solid white; transform: rotate(45deg) translate(-1px,-1px); display: block; }
+  .card-check:checked + .check-label { background: var(--accent); border-color: var(--accent); }
+  .card-check:checked + .check-label::after { opacity: 1; }
+  .card-check:checked ~ .activity-card .act-title { text-decoration: line-through; opacity: 0.45; }
+  .card-check:checked ~ .activity-card .act-desc { opacity: 0.4; }
+  .card-check:checked ~ .activity-card .act-meta { opacity: 0.4; }
+  .checkable:has(.card-check:checked) { opacity: 0.7; }
+
+  /* Delete btn */
+  .card-actions { position: absolute; bottom: 8px; right: 12px; display: flex; gap: 10px; }
+  .mini-btn { font-size: 10px; color: rgba(47,70,68,0.35); background: none; border: none; cursor: pointer; letter-spacing: 1px; padding: 2px 4px; }
+  .edit-btn:hover { color: var(--accent); }
+  .delete-btn:hover { color: #c97a7a; }
+
+  .empty-day { font-size: 12px; color: var(--text-secondary); text-align: center; padding: 14px; opacity: 0.6; }
+
+  /* Notes editable */
+  .notes-list { list-style: none; }
+  .notes-list li { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid rgba(47,70,68,0.07); font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+  .notes-list li:last-child { border-bottom: none; }
+  .notes-list li .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 7px; }
+  .note-text { flex: 1; cursor: pointer; padding-right: 4px; }
+  .note-text:hover { color: var(--text-primary); }
+  .note-del { background: none; border: none; color: rgba(47,70,68,0.30); cursor: pointer; font-size: 15px; line-height: 1; padding: 0 2px; flex-shrink: 0; }
+  .note-del:hover { color: #c97a7a; }
+  .add-note-btn { width: 100%; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; background: rgba(143,175,143,0.08); border: 1px dashed rgba(143,175,143,0.45); border-radius: 12px; padding: 9px; font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--accent); cursor: pointer; transition: all 0.2s; letter-spacing: 1px; }
+  .add-note-btn:hover { background: rgba(143,175,143,0.15); }
+  .empty-notes { font-size: 12px; color: var(--text-secondary); text-align: center; padding: 6px; opacity: 0.6; }
+
+  /* Add btn */
+  .add-section { margin-top: 18px; }
+  .add-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(255,255,255,0.70); border: 2px dashed rgba(143,175,143,0.45); border-radius: 16px; padding: 14px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--accent); cursor: pointer; transition: all 0.2s; letter-spacing: 1px; }
+  .add-btn:hover { background: rgba(143,175,143,0.08); border-color: rgba(143,175,143,0.65); }
+  .add-plus { font-size: 18px; font-weight: 300; line-height: 1; }
+
+  /* Modal full screen */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: #faf8f6; z-index: 100; flex-direction: column; overflow-y: auto; }
+  .modal-overlay.open { display: flex; }
+  .modal { width: 100%; max-width: 480px; margin: 0 auto; padding: 56px 24px 48px; flex: 1; display: flex; flex-direction: column; }
+  .modal-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+  .modal-title { font-family: 'Noto Serif SC', serif; font-size: 20px; color: var(--text-primary); }
+  .modal-close { width: 32px; height: 32px; border-radius: 50%; background: rgba(47,70,68,0.08); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--text-secondary); }
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 11px; letter-spacing: 2px; color: var(--text-secondary); font-weight: 500; margin-bottom: 6px; display: block; text-transform: uppercase; }
+  .form-input, .form-select, .form-textarea { width: 100%; background: #f7f5f3; border: 1px solid rgba(47,70,68,0.12); border-radius: 12px; padding: 11px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text-primary); outline: none; transition: border 0.2s; }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: rgba(143,175,143,0.6); background: #fff; }
+  .form-textarea { resize: none; height: 72px; line-height: 1.5; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .btn-cancel { flex: 1; padding: 13px; border: 1px solid rgba(47,70,68,0.15); border-radius: 50px; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text-secondary); cursor: pointer; }
+  .btn-save { flex: 2; padding: 13px; border: none; border-radius: 50px; background: var(--g1); color: white; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; letter-spacing: 0.5px; }
+  .btn-save:active { transform: scale(0.97); }
+
+  /* Footer & save */
+  .footer { text-align: center; margin-top: 40px; color: var(--text-secondary); font-size: 11px; letter-spacing: 2px; }
+  .footer .heart { color: var(--c-pink); }
+  .save-area { margin-top: 24px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .save-btn { display: flex; align-items: center; gap: 10px; background: var(--g1); color: white; border: none; border-radius: 50px; padding: 14px 36px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; letter-spacing: 1px; cursor: pointer; box-shadow: 0 4px 16px rgba(47,70,68,0.20); transition: all 0.2s; }
+  .save-btn:active { transform: scale(0.96); }
+  .cloud-settings-btn { margin-top: 4px; background: none; border: none; color: var(--text-secondary); font-family: 'DM Sans', sans-serif; font-size: 12px; cursor: pointer; letter-spacing: 1px; padding: 4px; }
+  .cloud-settings-btn:hover { color: var(--accent); }
+  .cloud-status { font-size: 11px; letter-spacing: 0.5px; min-height: 16px; }
+  .cloud-status.ok { color: var(--accent); }
+  .cloud-status.off { color: var(--text-secondary); }
+  .cloud-status.err { color: #c97a7a; }
+  .cloud-modal-tip { font-size: 12px; min-height: 18px; margin-bottom: 8px; text-align: center; letter-spacing: 0.5px; }
+  .cloud-modal-tip.ok { color: var(--accent); }
+  .cloud-modal-tip.err { color: #c97a7a; }
+  .save-tip { font-size: 12px; color: var(--text-secondary); letter-spacing: 1px; min-height: 18px; }
+
+  .fade-in { animation: fadeUp 0.4s ease backwards; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Food map */
+  #food-map { width: 100%; height: 620px; z-index: 1; }
+  .map-legend { display: flex; gap: 14px; justify-content: center; padding: 10px; background: rgba(255,255,255,0.92); border-top: 1px solid var(--glass-border); flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-secondary); }
+  .legend-item i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .dot-centro { background: #EDAFB8; }
+  .dot-salamanca { background: #8FAF8F; }
+  .dot-retiro { background: #C99FC4; }
+  .dot-usera { background: #E8A87C; }
+  .dot-suburb { background: #9DB4C0; }
+  .dot-trip { background: #5a8f6e; }
+  .leaflet-popup-content-wrapper { border-radius: 14px; }
+  .leaflet-popup-content { margin: 12px 14px; font-family: 'DM Sans', sans-serif; }
+  .map-pop-title { font-family: 'Noto Serif SC', serif; font-size: 15px; color: var(--g1); font-weight: 600; margin-bottom: 4px; }
+  .map-pop-meta { font-size: 12px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 3px; }
+  .map-pop-rating { color: #e0a52e; font-weight: 600; }
+  .map-pop-link { display: inline-block; margin-top: 6px; font-size: 12px; color: var(--accent); font-weight: 600; text-decoration: none; }
+  .custom-marker { border-radius: 50%; border: 2.5px solid #fff; box-shadow: 0 2px 6px rgba(47,70,68,0.3); display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .map-name-label { background: rgba(255,255,255,0.95); border: 1px solid var(--glass-border); border-radius: 6px; padding: 1px 5px; font-family: 'DM Sans','Noto Serif SC',sans-serif; font-size: 9px; font-weight: 600; color: var(--g1); box-shadow: 0 1px 4px rgba(47,70,68,0.12); white-space: nowrap; }
+  .map-name-label::before { display: none; }
+  .leaflet-tooltip-top.map-name-label::before { border-top-color: rgba(255,255,255,0.95); display: block; }
+</style>
+</head>
+<body>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+
+<div class="container">
+
+  <div class="header">
+    <div class="header-tag">✦ 旅行行程单 ✦</div>
+    <h1>六月周边游</h1>
+    <div class="subtitle">A little escape with friends</div>
+    <div class="divider"></div>
+  </div>
+
+  <div class="date-banner">
+    <div class="date-point">
+      <div class="day">18</div>
+      <div class="month">JUN · 出发</div>
+    </div>
+    <div class="date-arrow">
+      <span class="nights-badge">3 晚</span>
+      <div class="arrow-wrap">
+        <div class="arrow-line"></div>
+        <div class="arrow-head">▶</div>
+      </div>
+    </div>
+    <div class="date-point">
+      <div class="day">21</div>
+      <div class="month">JUN · 返回</div>
+    </div>
+  </div>
+
+  <!-- 去程 -->
+  <div class="section-label"><span>去程</span></div>
+  <div class="glass-card train-card">
+    <div class="train-header">
+      <div class="train-icon">🚄</div>
+      <div class="train-info">
+        <div class="label">交通方式</div>
+        <div class="value">高铁 · 出发</div>
+      </div>
+      <div class="direction-badge">去程</div>
+    </div>
+    <div class="time-row">
+      <div class="time-block"><div class="time">09:23</div><div class="date-small">6月18日</div></div>
+      <div class="time-track"><div class="track-line"></div><div class="duration">约 3h37min</div></div>
+      <div class="time-block"><div class="time">13:00</div><div class="date-small">抵达</div></div>
+    </div>
+  </div>
+
+  <!-- 每日行程 -->
+  <div class="section-label"><span>行程安排</span></div>
+  <div id="day-list"></div>
+
+  <!-- 添加按钮 -->
+  <div class="add-section">
+    <button class="add-btn" onclick="openModal()">
+      <span class="add-plus">+</span> 添加行程
+    </button>
+  </div>
+
+  <!-- 返程 -->
+  <div class="section-label"><span>返程 · 6月21日</span></div>
+  <div class="glass-card train-card">
+    <div class="train-header">
+      <div class="train-icon">🚄</div>
+      <div class="train-info">
+        <div class="label">交通方式</div>
+        <div class="value">高铁 · 返程</div>
+      </div>
+      <div class="direction-badge">返程</div>
+    </div>
+    <div class="time-row">
+      <div class="time-block"><div class="time">16:37</div><div class="date-small">6月21日</div></div>
+      <div class="time-track"><div class="track-line"></div><div class="duration">约 3h11min</div></div>
+      <div class="time-block"><div class="time">19:48</div><div class="date-small">抵达</div></div>
+    </div>
+  </div>
+
+  <!-- 美食地图 -->
+  <div class="section-label"><span>美食地图</span></div>
+  <div class="glass-card" style="padding:0; overflow:hidden;">
+    <div id="food-map"></div>
+    <div class="map-legend">
+      <span class="legend-item"><i class="dot-centro"></i> Centro</span>
+      <span class="legend-item"><i class="dot-salamanca"></i> Salamanca</span>
+      <span class="legend-item"><i class="dot-retiro"></i> Retiro</span>
+      <span class="legend-item"><i class="dot-usera"></i> Usera</span>
+      <span class="legend-item"><i class="dot-suburb"></i> 郊区</span>
+      <span class="legend-item"><i class="dot-trip"></i> 出游</span>
+    </div>
+  </div>
+
+  <!-- 备注 -->
+  <div class="section-label"><span>备注</span></div>
+  <div class="glass-card" id="notes-card">
+    <ul class="notes-list" id="notes-list" style="list-style:none;"></ul>
+    <button class="add-note-btn" onclick="openNoteModal()"><span class="add-plus">+</span> 添加备注</button>
+  </div>
+
+  <div class="footer">
+    <p>✦ &nbsp; 行程持续更新中 &nbsp; ✦</p>
+    <p style="margin-top:8px;">Made with <span class="heart">♥</span></p>
+  </div>
+  <div class="save-area">
+    <button class="save-btn" onclick="saveAll()">保存行程</button>
+    <div class="save-tip" id="saveTip"></div>
+    <button class="cloud-settings-btn" onclick="openCloudModal()">⚙️ 云端同步设置</button>
+    <div class="cloud-status" id="cloudStatus"></div>
+  </div>
+</div>
+
+<!-- 添加行程 Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-top">
+      <div class="modal-title" id="modal-title">添加行程</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">日期</label>
+      <select class="form-select" id="f-day">
+        <option value="18">6月18日</option>
+        <option value="19" selected>6月19日</option>
+        <option value="20">6月20日</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">标题</label>
+      <input class="form-input" id="f-title" placeholder="如：Monasterio de Piedra">
+    </div>
+    <div class="form-group">
+      <label class="form-label">描述</label>
+      <textarea class="form-textarea" id="f-desc" placeholder="如：游览约3小时，免费停车场"></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">时间标签</label>
+        <input class="form-input" id="f-time" placeholder="如：上午抵达">
+      </div>
+      <div class="form-group">
+        <label class="form-label">图标 emoji</label>
+        <input class="form-input" id="f-icon" placeholder="🗺️" style="font-size:20px; text-align:center;">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">门票（选填）</label>
+      <div class="form-row">
+        <input class="form-input" id="f-ticket1" placeholder="线上 €18">
+        <input class="form-input" id="f-ticket2" placeholder="现场 €19">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn-save" id="modal-save-btn" onclick="addActivity()">添加 ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- 云端同步设置 Modal -->
+<div class="modal-overlay" id="cloud-modal">
+  <div class="modal">
+    <div class="modal-top">
+      <div class="modal-title">云端同步设置</div>
+      <button class="modal-close" onclick="closeCloudModal()">✕</button>
+    </div>
+    <p style="font-size:12px; color:var(--text-secondary); line-height:1.6; margin-bottom:18px;">
+      填入 GitHub Token 和 Gist ID，行程就能同步到云端。其他设备填同样的信息即可看到同一份数据。<br>
+      信息只保存在本设备浏览器，不会上传到代码里。
+    </p>
+    <div class="form-group">
+      <label class="form-label">GitHub Token</label>
+      <input class="form-input" id="c-token" type="password" placeholder="ghp_xxxxxxxx" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Gist ID</label>
+      <input class="form-input" id="c-gist" placeholder="a1b2c3d4e5f6..." autocomplete="off">
+    </div>
+    <div class="cloud-modal-tip" id="cloudModalTip"></div>
+    <div class="modal-actions" style="flex-direction:column; gap:10px;">
+      <button class="btn-save" style="flex:none; width:100%;" onclick="saveCloudConfig()">保存并测试连接</button>
+      <button class="btn-save" style="flex:none; width:100%; background:var(--accent);" onclick="pullFromCloud(true)">⬇ 从云端拉取数据</button>
+      <button class="btn-cancel" style="flex:none; width:100%;" onclick="clearCloudConfig()">清除云端配置</button>
+    </div>
+  </div>
+</div>
+
+<!-- 备注 Modal -->
+<div class="modal-overlay" id="note-modal">
+  <div class="modal">
+    <div class="modal-top">
+      <div class="modal-title" id="note-modal-title">添加备注</div>
+      <button class="modal-close" onclick="closeNoteModal()">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">备注内容</label>
+      <textarea class="form-textarea" id="note-text" style="height:96px;" placeholder="如：18号是否需要请假，等确认后再定"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeNoteModal()">取消</button>
+      <button class="btn-save" id="note-save-btn" onclick="saveNote()">添加 ✓</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const DAYS = [
+    { day: '18', label: '6月18日', sub: '抵达 · 周边' },
+    { day: '19', label: '6月19日', sub: 'Zaragoza 一日' },
+    { day: '20', label: '6月20日', sub: '自由安排' },
+  ];
+
+  const DEFAULT_ACTIVITIES = [
+    { id: 'a1', day: '18', icon: '✂️', iconClass: 'icon-green', title: '理发 & 造型', desc: '陪小伙伴去做头发，悠闲下午时光', time: '下午 抵达后', ticket1: '', ticket2: '', checked: false },
+    { id: 'a2', day: '18', icon: '💅', iconClass: 'icon-pink', title: '美甲', desc: '陪她做美甲，待确认是否安排（视她的意愿）', time: '下午 待确认', ticket1: '', ticket2: '', checked: false },
+    { id: 'a3', day: '18', icon: '🍽️', iconClass: 'icon-peach', title: '一起吃饭', desc: '下班后汇合，大家一起聚餐', time: '晚间', ticket1: '', ticket2: '', checked: false },
+    { id: 'a4', day: '19', icon: '🚗', iconClass: 'icon-green', title: '驾车前往 Zaragoza', desc: '车程约 2 小时 · 免费停车场', time: '早上出发', ticket1: '', ticket2: '', checked: false },
+    { id: 'a5', day: '19', icon: '🏞️', iconClass: 'icon-pink', title: 'Monasterio de Piedra', desc: '石头修道院，游览约 3 小时', time: '上午抵达', ticket1: '线上 €18', ticket2: '现场 €19', checked: false },
+  ];
+
+  let activities = [];
+  let collapsed = {}; // 记录每天展开收起状态
+  let notes = [];
+
+  const DEFAULT_NOTES = [
+    '18号是否需要请假，等确认后再定',
+    '美甲视对方意愿决定是否安排',
+    '返程已定方案A（16:37 → 19:48）',
+  ];
+
+  // ── 云端同步配置（存浏览器，不进代码）──
+  const CLOUD_FILE = 'trip-data.json';
+  function getCloudConfig() {
+    return {
+      token: localStorage.getItem('gistToken') || '',
+      gistId: localStorage.getItem('gistId') || '',
+    };
+  }
+  function hasCloud() {
+    const c = getCloudConfig();
+    return c.token && c.gistId;
+  }
+
+  function setCloudStatus(text, cls) {
+    const el = document.getElementById('cloudStatus');
+    if (!el) return;
+    el.textContent = text;
+    el.className = 'cloud-status ' + (cls || '');
+  }
+
+  // 从云端 Gist 拉取
+  async function pullFromCloud(showTip) {
+    const c = getCloudConfig();
+    if (!c.token || !c.gistId) {
+      if (showTip) cloudTip('请先填写 Token 和 Gist ID', 'err');
+      return false;
+    }
+    try {
+      const res = await fetch(`https://api.github.com/gists/${c.gistId}`, {
+        headers: { Authorization: `token ${c.token}`, Accept: 'application/vnd.github+json' },
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const gist = await res.json();
+      const file = gist.files[CLOUD_FILE];
+      if (file && file.content && file.content.trim() && file.content.trim() !== '{}') {
+        const data = JSON.parse(file.content);
+        activities = data.activities || [];
+        collapsed = data.collapsed || {};
+        notes = data.notes || [];
+        renderAll();
+        renderNotes();
+        if (showTip) cloudTip('✓ 已从云端拉取最新数据', 'ok');
+        setCloudStatus('☁ 云端已同步', 'ok');
+        return true;
+      } else {
+        if (showTip) cloudTip('云端暂无数据（首次使用，保存后即上传）', 'ok');
+        return false;
+      }
+    } catch (e) {
+      if (showTip) cloudTip('拉取失败：' + e.message + '（检查 Token/Gist ID）', 'err');
+      setCloudStatus('☁ 同步失败', 'err');
+      return false;
+    }
+  }
+
+  // 推送到云端 Gist
+  async function pushToCloud() {
+    const c = getCloudConfig();
+    if (!c.token || !c.gistId) return false;
+    try {
+      const res = await fetch(`https://api.github.com/gists/${c.gistId}`, {
+        method: 'PATCH',
+        headers: { Authorization: `token ${c.token}`, Accept: 'application/vnd.github+json' },
+        body: JSON.stringify({ files: { [CLOUD_FILE]: { content: JSON.stringify({ activities, collapsed, notes }, null, 2) } } }),
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      setCloudStatus('☁ 云端已同步 · ' + new Date().toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'}), 'ok');
+      return true;
+    } catch (e) {
+      setCloudStatus('☁ 上传失败：' + e.message, 'err');
+      return false;
+    }
+  }
+
+  async function loadAll() {
+    // 先读本地，保证离线/未配置也能用
+    const saved = localStorage.getItem('tripData_v3');
+    if (saved) {
+      const data = JSON.parse(saved);
+      activities = data.activities || [];
+      collapsed = data.collapsed || {};
+      notes = data.notes || [];
+    } else {
+      activities = JSON.parse(JSON.stringify(DEFAULT_ACTIVITIES));
+      collapsed = {};
+      notes = [...DEFAULT_NOTES];
+    }
+    renderAll();
+    renderNotes();
+    // 已配置云端则拉取覆盖
+    if (hasCloud()) {
+      setCloudStatus('☁ 正在从云端同步…', 'off');
+      await pullFromCloud(false);
+    } else {
+      setCloudStatus('未配置云端同步（仅本地保存）', 'off');
+    }
+  }
+
+  async function saveAll() {
+    localStorage.setItem('tripData_v3', JSON.stringify({ activities, collapsed, notes }));
+    const tip = document.getElementById('saveTip');
+    tip.textContent = '✓ 已保存到本地';
+    if (hasCloud()) {
+      setCloudStatus('☁ 正在上传云端…', 'off');
+      const ok = await pushToCloud();
+      tip.textContent = ok ? '✓ 已保存并同步云端' : '✓ 已保存本地（云端上传失败）';
+    }
+    setTimeout(() => tip.textContent = '', 2500);
+  }
+
+  // ── 云端设置弹窗 ──
+  function cloudTip(text, cls) {
+    const el = document.getElementById('cloudModalTip');
+    el.textContent = text;
+    el.className = 'cloud-modal-tip ' + (cls || '');
+  }
+  function openCloudModal() {
+    const c = getCloudConfig();
+    document.getElementById('c-token').value = c.token;
+    document.getElementById('c-gist').value = c.gistId;
+    cloudTip('', '');
+    document.getElementById('cloud-modal').classList.add('open');
+  }
+  function closeCloudModal() {
+    document.getElementById('cloud-modal').classList.remove('open');
+  }
+  async function saveCloudConfig() {
+    const token = document.getElementById('c-token').value.trim();
+    const gistId = document.getElementById('c-gist').value.trim();
+    if (!token || !gistId) { cloudTip('请填写 Token 和 Gist ID', 'err'); return; }
+    localStorage.setItem('gistToken', token);
+    localStorage.setItem('gistId', gistId);
+    cloudTip('正在测试连接…', '');
+    const ok = await pullFromCloud(true);
+    if (ok === false) {
+      // 拉取没数据但连接成功的情况已在pullFromCloud里给了提示；这里再尝试推一次初始化
+    }
+  }
+  function clearCloudConfig() {
+    if (!confirm('确认清除本设备的云端配置？（不影响云端已存的数据）')) return;
+    localStorage.removeItem('gistToken');
+    localStorage.removeItem('gistId');
+    document.getElementById('c-token').value = '';
+    document.getElementById('c-gist').value = '';
+    cloudTip('已清除本设备配置', 'ok');
+    setCloudStatus('未配置云端同步（仅本地保存）', 'off');
+  }
+
+  // ── 备注增删改 ──
+  function escapeHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function renderNotes() {
+    const list = document.getElementById('notes-list');
+    if (!list) return;
+    list.innerHTML = '';
+    if (notes.length === 0) {
+      list.innerHTML = '<li class="empty-notes" style="border:none;">暂无备注</li>';
+      return;
+    }
+    notes.forEach((text, i) => {
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <span class="dot"></span>
+        <span class="note-text" onclick="editNote(${i})">${escapeHtml(text)}</span>
+        <button class="note-del" onclick="deleteNote(${i})">✕</button>
+      `;
+      list.appendChild(li);
+    });
+  }
+
+  let editingNote = null;
+  function openNoteModal() {
+    editingNote = null;
+    document.getElementById('note-modal-title').textContent = '添加备注';
+    document.getElementById('note-save-btn').textContent = '添加 ✓';
+    document.getElementById('note-text').value = '';
+    document.getElementById('note-modal').classList.add('open');
+    document.getElementById('note-text').focus();
+  }
+  function editNote(i) {
+    editingNote = i;
+    document.getElementById('note-modal-title').textContent = '编辑备注';
+    document.getElementById('note-save-btn').textContent = '保存修改 ✓';
+    document.getElementById('note-text').value = notes[i];
+    document.getElementById('note-modal').classList.add('open');
+    document.getElementById('note-text').focus();
+  }
+  function closeNoteModal() {
+    document.getElementById('note-modal').classList.remove('open');
+    editingNote = null;
+  }
+  function saveNote() {
+    const text = document.getElementById('note-text').value.trim();
+    if (!text) { document.getElementById('note-text').focus(); return; }
+    if (editingNote !== null) {
+      notes[editingNote] = text;
+    } else {
+      notes.push(text);
+    }
+    closeNoteModal();
+    renderNotes();
+  }
+  function deleteNote(i) {
+    if (!confirm('确认删除这条备注？')) return;
+    notes.splice(i, 1);
+    renderNotes();
+  }
+
+  function renderAll() {
+    const list = document.getElementById('day-list');
+    list.innerHTML = '';
+
+    DAYS.forEach((d, di) => {
+      const dayActs = activities.filter(a => a.day === d.day);
+      const isCollapsed = collapsed[d.day] || false;
+
+      const group = document.createElement('div');
+      group.className = 'day-group fade-in' + (isCollapsed ? ' collapsed' : '');
+      group.style.animationDelay = (di * 0.06) + 's';
+
+      // 卡片体
+      let bodyHtml = '';
+      if (dayActs.length === 0) {
+        bodyHtml = '<div class="empty-day">暂无安排</div>';
+      } else {
+        dayActs.forEach(a => {
+          const tickets = (a.ticket1 || a.ticket2) ? `
+            <div class="act-meta" style="margin-top:4px;">
+              ${a.ticket1 ? `<span class="ticket-tag">🎟 ${a.ticket1}</span>` : ''}
+              ${a.ticket2 ? `<span class="ticket-tag alt">${a.ticket2}</span>` : ''}
+            </div>` : '';
+          bodyHtml += `
+            <div class="glass-card checkable">
+              <input type="checkbox" class="card-check" id="${a.id}" ${a.checked ? 'checked' : ''} onchange="toggleCheck('${a.id}', this.checked)">
+              <label class="check-label" for="${a.id}"></label>
+              <div class="activity-card">
+                <div class="activity-icon ${a.iconClass}">${a.icon}</div>
+                <div class="activity-content">
+                  <div class="act-title">${a.title}</div>
+                  <div class="act-desc">${a.desc}</div>
+                  <div class="act-meta">${a.time ? `<span class="time-tag">${a.time}</span>` : ''}</div>
+                  ${tickets}
+                </div>
+              </div>
+              <div class="card-actions">
+                <button class="mini-btn edit-btn" onclick="openModal('${a.id}')">编辑</button>
+                <button class="mini-btn delete-btn" onclick="deleteActivity('${a.id}')">删除</button>
+              </div>
+            </div>`;
+        });
+      }
+
+      group.innerHTML = `
+        <div class="day-header" onclick="toggleDay('${d.day}')">
+          <div class="day-num"><div class="d">${d.day}</div><div class="m">JUN</div></div>
+          <div class="day-title">
+            <div class="dt-main">${d.label}</div>
+            <div class="dt-sub">${d.sub}</div>
+          </div>
+          <span class="day-count">${dayActs.length} 项</span>
+          <div class="day-chevron"></div>
+        </div>
+        <div class="day-body">${bodyHtml}</div>
+      `;
+      list.appendChild(group);
+    });
+  }
+
+  function toggleDay(day) {
+    collapsed[day] = !collapsed[day];
+    renderAll();
+  }
+
+  function toggleCheck(id, val) {
+    const a = activities.find(x => x.id === id);
+    if (a) a.checked = val;
+  }
+
+  function deleteActivity(id) {
+    if (!confirm('确认删除这条行程？')) return;
+    activities = activities.filter(a => a.id !== id);
+    renderAll();
+  }
+
+  let editingId = null;
+
+  function openModal(id) {
+    editingId = id || null;
+    const modal = document.getElementById('modal');
+    const titleEl = document.getElementById('modal-title');
+    const btn = document.getElementById('modal-save-btn');
+
+    if (editingId) {
+      // 编辑模式：填入现有数据
+      const a = activities.find(x => x.id === editingId);
+      if (!a) return;
+      titleEl.textContent = '编辑行程';
+      btn.textContent = '保存修改 ✓';
+      document.getElementById('f-day').value = a.day;
+      document.getElementById('f-title').value = a.title;
+      document.getElementById('f-desc').value = a.desc;
+      document.getElementById('f-time').value = a.time;
+      document.getElementById('f-icon').value = a.icon;
+      document.getElementById('f-ticket1').value = a.ticket1;
+      document.getElementById('f-ticket2').value = a.ticket2;
+    } else {
+      titleEl.textContent = '添加行程';
+      btn.textContent = '添加 ✓';
+    }
+    modal.classList.add('open');
+    if (!editingId) document.getElementById('f-title').focus();
+  }
+
+  function closeModal() {
+    document.getElementById('modal').classList.remove('open');
+    editingId = null;
+    ['f-title','f-desc','f-time','f-icon','f-ticket1','f-ticket2'].forEach(id => document.getElementById(id).value = '');
+  }
+
+  function getIconClass(icon) {
+    const pinks = ['💅','💄','🌸','🎀','💗','🏞️'];
+    const peaches = ['🍽️','☕','🍜','🥘','🍷'];
+    return pinks.includes(icon) ? 'icon-pink' : peaches.includes(icon) ? 'icon-peach' : 'icon-green';
+  }
+
+  function addActivity() {
+    const title = document.getElementById('f-title').value.trim();
+    if (!title) { document.getElementById('f-title').focus(); return; }
+    const icon = document.getElementById('f-icon').value.trim() || '📍';
+    const day = document.getElementById('f-day').value;
+
+    const data = {
+      day, icon, iconClass: getIconClass(icon), title,
+      desc: document.getElementById('f-desc').value.trim(),
+      time: document.getElementById('f-time').value.trim(),
+      ticket1: document.getElementById('f-ticket1').value.trim(),
+      ticket2: document.getElementById('f-ticket2').value.trim(),
+    };
+
+    if (editingId) {
+      // 更新现有
+      const a = activities.find(x => x.id === editingId);
+      if (a) Object.assign(a, data);
+    } else {
+      // 新增
+      activities.push({ id: 'a' + Date.now(), ...data, checked: false });
+    }
+    collapsed[day] = false;
+    closeModal();
+    renderAll();
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeNoteModal(); closeCloudModal(); } });
+
+  // ── 美食地图 ──
+  const FOOD_PLACES = [
+    { name: 'Liukoushui Ramen 流口水', label: '流口水小面', dir: 'left', offset: [-16, 0], emoji: '🍜', lat: 40.4236302, lng: -3.7092515, zone: 'centro', rating: '4.6', meta: '重庆小面/米线 · 份量大', hours: '12:30–16:30, 19:00–23:00', gmaps: 'https://maps.google.com/?cid=13952298006316524534' },
+    { name: '锦里 KOI TEA', label: '锦里 KOI 奶茶', dir: 'top', offset: [0, -16], emoji: '🧋', lat: 40.4246366, lng: -3.7016119, zone: 'centro', rating: '4.4', meta: '奶茶 · 刨冰甜品', hours: '13:30–22:30 · 周三休', gmaps: 'https://maps.google.com/?cid=2458676993244401857' },
+    { name: 'PURY JOKBAL 韩式猪蹄', label: 'PURY 韩式猪蹄', dir: 'bottom', offset: [0, 16], emoji: '🐷', lat: 40.4192997, lng: -3.7075111, zone: 'centro', rating: '4.9', meta: '韩式猪蹄/菜包肉 · 需预约', hours: '13:00–16:00, 19:00–23:00 · 周日休', gmaps: 'https://maps.google.com/?cid=16611181408599730406' },
+    { name: 'HanSo Café', label: 'HanSo Café', dir: 'right', offset: [16, 0], emoji: '☕', lat: 40.4235109, lng: -3.7026311, zone: 'centro', rating: '4.3', meta: '网红咖啡 · 三明治甜点', hours: '9:00–20:00 · 常排队', gmaps: 'https://maps.google.com/?cid=4863409570507183551' },
+    { name: 'Yue Lai 火锅', label: 'Yue Lai 火锅', dir: 'top', offset: [0, -16], emoji: '🍲', lat: 40.4259375, lng: -3.6745047, zone: 'salamanca', rating: '4.5', meta: '性价比火锅 · 菜新鲜', hours: '12:30–16:30, 19:30–24:00 · 周二休', gmaps: 'https://maps.google.com/?cid=3130876169433569488' },
+    { name: 'Monasterio de Piedra', label: 'Monasterio de Piedra', dir: 'top', offset: [0, -16], emoji: '🏞️', lat: 41.1936567, lng: -1.7820453, zone: 'trip', rating: '4.7', meta: '石头修道院 · 25+瀑布 · 游览2-3h', hours: '9:00–19:00 · 免费停车 · 线上票€15.2', gmaps: 'https://maps.google.com/?cid=12814747786231315663' },
+    { name: 'MOMOTTA', label: 'MOMOTTA 甜品奶茶', dir: 'bottom', offset: [0, 16], emoji: '🧁', lat: 40.3852933, lng: -3.7067774, zone: 'usera', rating: '4.4', meta: '奶茶 · 蛋糕/泡芙（栗子、抹茶红豆）', hours: '14:00–21:00 · 周一休 · Usera区', gmaps: 'https://maps.google.com/?cid=8309845266926584976' },
+    { name: 'Sanchi Tea & Zazas', label: 'Sanchi 茶饮甜品', dir: 'top', offset: [0, -16], emoji: '🧋', lat: 40.385599, lng: -3.70621, zone: 'usera', rating: '4.7', meta: '珍珠奶茶 · 芝士奶盖。⚠️ 显示临时停业', hours: 'Usera区 · 去前先确认是否营业', gmaps: 'https://maps.google.com/?cid=12301582443098869155' },
+    { name: 'Castelados', label: 'Castelados 海鲜', dir: 'right', offset: [16, 0], emoji: '🦞', lat: 40.4207379, lng: -3.6790948, zone: 'retiro', rating: '4.6', meta: '西班牙海鲜餐厅 · 蒜香虾/朝鲜蓟 · 需预约', hours: '12:30–17:00, 20:00–24:00 · 周日休 · Retiro区', gmaps: 'https://maps.google.com/?cid=4053477595447366102' },
+    { name: 'Quispe Madrid', label: 'Quispe 秘鲁菜', dir: 'top', offset: [0, -16], emoji: '🇵🇪', lat: 40.4215716, lng: -3.6880171, zone: 'salamanca', rating: '4.8', meta: '秘鲁菜 · 酸橘汁腌鱼/Pisco Sour · 需预约', hours: '13:30–17:00, 20:00–次日0:30 · Salamanca区', gmaps: 'https://maps.google.com/?cid=11410684589934597914' },
+    { name: 'MOMOTTA (Fuenlabrada)', label: 'MOMOTTA 分店', dir: 'top', offset: [0, -16], emoji: '🧁', lat: 40.2610644, lng: -3.7438875, zone: 'suburb', rating: '4.8', meta: '甜品奶茶分店 · 芋泥/迷你泡芙/焦糖布丁', hours: '12:00–19:00 · 周六休 · Fuenlabrada郊区', gmaps: 'https://maps.google.com/?cid=1638586071795696295' },
+    { name: 'Hot Pot de Sichuan 四川火锅', label: '四川火锅', dir: 'left', offset: [-16, 0], emoji: '🌶️', lat: 40.4187499, lng: -3.7074797, zone: 'centro', rating: '4.6', meta: '正宗川式火锅 · 食材新鲜份量大', hours: '13:00–16:00, 19:00–23:30 · Centro区', gmaps: 'https://maps.google.com/?cid=11969297557503805685' },
+    { name: 'Restaurante de Sichuan 四川饭店', label: '四川饭店', dir: 'right', offset: [16, 0], emoji: '🥢', lat: 40.4194866, lng: -3.7009853, zone: 'centro', rating: '4.5', meta: '正宗川菜 · 蒜蓉虾/脆皮鸭 · 建议预约', hours: '13:00–16:30, 19:30–23:30 · Centro区', gmaps: 'https://maps.google.com/?cid=1837127183883903831' },
+  ];
+
+  const ZONE_COLOR = { centro: '#EDAFB8', salamanca: '#8FAF8F', trip: '#5a8f6e', usera: '#E8A87C', retiro: '#C99FC4', suburb: '#9DB4C0' };
+
+  function initMap() {
+    const map = L.map('food-map', { scrollWheelZoom: false }).setView([40.424, -3.703], 14);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 19,
+    }).addTo(map);
+
+    const markers = [];
+    FOOD_PLACES.forEach(p => {
+      const color = ZONE_COLOR[p.zone];
+      const icon = L.divIcon({
+        className: '', html: `<div class="custom-marker" style="width:30px;height:30px;background:${color};">${p.emoji}</div>`,
+        iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -16],
+      });
+      const m = L.marker([p.lat, p.lng], { icon }).addTo(map);
+      m.bindTooltip(p.label || p.name, { permanent: true, direction: p.dir || 'top', offset: p.offset || [0, -16], className: 'map-name-label' });
+      m.bindPopup(`
+        <div class="map-pop-title">${p.emoji} ${p.name}</div>
+        <div class="map-pop-meta"><span class="map-pop-rating">★ ${p.rating}</span> · ${p.meta}</div>
+        <div class="map-pop-meta">🕐 ${p.hours}</div>
+        <a class="map-pop-link" href="${p.gmaps}" target="_blank">在 Google Maps 打开 →</a>
+      `);
+      markers.push(m);
+    });
+
+    // 自适应显示马德里核心市区的点（排除较远的 Monasterio 和 Fuenlabrada 分店）
+    const cityMarkers = markers.filter((_, i) => !['trip','suburb'].includes(FOOD_PLACES[i].zone));
+    const grp = L.featureGroup(cityMarkers);
+    map.fitBounds(grp.getBounds().pad(0.35));
+  }
+
+  loadAll();
+  // 延迟初始化地图，确保容器尺寸就绪
+  setTimeout(initMap, 100);
+</script>
+</body>
+</html>
