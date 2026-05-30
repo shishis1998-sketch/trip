@@ -218,9 +218,13 @@
   .map-pop-rating { color: #e0a52e; font-weight: 600; }
   .map-pop-link { display: inline-block; margin-top: 6px; font-size: 12px; color: var(--accent); font-weight: 600; text-decoration: none; }
   .custom-marker { border-radius: 50%; border: 2.5px solid #fff; box-shadow: 0 2px 6px rgba(47,70,68,0.3); display: flex; align-items: center; justify-content: center; font-size: 14px; }
-  .map-name-label { background: rgba(255,255,255,0.95); border: 1px solid var(--glass-border); border-radius: 6px; padding: 1px 5px; font-family: 'DM Sans','Noto Serif SC',sans-serif; font-size: 9px; font-weight: 600; color: var(--g1); box-shadow: 0 1px 4px rgba(47,70,68,0.12); white-space: nowrap; }
-  .map-name-label::before { display: none; }
-  .leaflet-tooltip-top.map-name-label::before { border-top-color: rgba(255,255,255,0.95); display: block; }
+  .map-name-label { background: var(--c-dark); border: none; border-radius: 7px; padding: 2px 8px; font-family: 'DM Sans','Noto Serif SC',sans-serif; font-size: 9.5px; font-weight: 600; color: #fff; box-shadow: 0 2px 8px rgba(47,70,68,0.35); white-space: nowrap; letter-spacing: 0.3px; }
+  /* 连接气泡到地标的小箭头/指针，四个方向 */
+  .map-name-label::before { display: block !important; border: 5px solid transparent; }
+  .leaflet-tooltip-top.map-name-label::before { border-top-color: var(--c-dark); }
+  .leaflet-tooltip-bottom.map-name-label::before { border-bottom-color: var(--c-dark); }
+  .leaflet-tooltip-left.map-name-label::before { border-left-color: var(--c-dark); }
+  .leaflet-tooltip-right.map-name-label::before { border-right-color: var(--c-dark); }
 </style>
 </head>
 <body>
@@ -812,9 +816,9 @@
   // ── 美食地图 ──
   const FOOD_PLACES = [
     { name: 'Liukoushui Ramen 流口水', label: '流口水小面', dir: 'left', offset: [-16, 0], emoji: '🍜', lat: 40.4236302, lng: -3.7092515, zone: 'centro', rating: '4.6', meta: '重庆小面/米线 · 份量大', hours: '12:30–16:30, 19:00–23:00', gmaps: 'https://maps.google.com/?cid=13952298006316524534' },
-    { name: '锦里 KOI TEA', label: '锦里 KOI 奶茶', dir: 'top', offset: [0, -16], emoji: '🧋', lat: 40.4246366, lng: -3.7016119, zone: 'centro', rating: '4.4', meta: '奶茶 · 刨冰甜品', hours: '13:30–22:30 · 周三休', gmaps: 'https://maps.google.com/?cid=2458676993244401857' },
-    { name: 'PURY JOKBAL 韩式猪蹄', label: 'PURY 韩式猪蹄', dir: 'bottom', offset: [0, 16], emoji: '🐷', lat: 40.4192997, lng: -3.7075111, zone: 'centro', rating: '4.9', meta: '韩式猪蹄/菜包肉 · 需预约', hours: '13:00–16:00, 19:00–23:00 · 周日休', gmaps: 'https://maps.google.com/?cid=16611181408599730406' },
-    { name: 'HanSo Café', label: 'HanSo Café', dir: 'right', offset: [16, 0], emoji: '☕', lat: 40.4235109, lng: -3.7026311, zone: 'centro', rating: '4.3', meta: '网红咖啡 · 三明治甜点', hours: '9:00–20:00 · 常排队', gmaps: 'https://maps.google.com/?cid=4863409570507183551' },
+    { name: '锦里 KOI TEA', label: '锦里 KOI 奶茶', dir: 'top', offset: [0, -22], emoji: '🧋', lat: 40.4246366, lng: -3.7016119, zone: 'centro', rating: '4.4', meta: '奶茶 · 刨冰甜品', hours: '13:30–22:30 · 周三休', gmaps: 'https://maps.google.com/?cid=2458676993244401857' },
+    { name: 'PURY JOKBAL 韩式猪蹄', label: 'PURY 韩式猪蹄', dir: 'left', offset: [-22, 0], emoji: '🐷', lat: 40.4192997, lng: -3.7075111, zone: 'centro', rating: '4.9', meta: '韩式猪蹄/菜包肉 · 需预约', hours: '13:00–16:00, 19:00–23:00 · 周日休', gmaps: 'https://maps.google.com/?cid=16611181408599730406' },
+    { name: 'HanSo Café', label: 'HanSo Café', dir: 'bottom', offset: [0, 22], emoji: '☕', lat: 40.4235109, lng: -3.7026311, zone: 'centro', rating: '4.3', meta: '网红咖啡 · 三明治甜点', hours: '9:00–20:00 · 常排队', gmaps: 'https://maps.google.com/?cid=4863409570507183551' },
     { name: 'Yue Lai 火锅', label: 'Yue Lai 火锅', dir: 'top', offset: [0, -16], emoji: '🍲', lat: 40.4259375, lng: -3.6745047, zone: 'salamanca', rating: '4.5', meta: '性价比火锅 · 菜新鲜', hours: '12:30–16:30, 19:30–24:00 · 周二休', gmaps: 'https://maps.google.com/?cid=3130876169433569488' },
     { name: 'Monasterio de Piedra', label: 'Monasterio de Piedra', dir: 'top', offset: [0, -16], emoji: '🏞️', lat: 41.1936567, lng: -1.7820453, zone: 'trip', rating: '4.7', meta: '石头修道院 · 25+瀑布 · 游览2-3h', hours: '9:00–19:00 · 免费停车 · 线上票€15.2', gmaps: 'https://maps.google.com/?cid=12814747786231315663' },
     { name: 'MOMOTTA', label: 'MOMOTTA 甜品奶茶', dir: 'bottom', offset: [0, 16], emoji: '🧁', lat: 40.3852933, lng: -3.7067774, zone: 'usera', rating: '4.4', meta: '奶茶 · 蛋糕/泡芙（栗子、抹茶红豆）', hours: '14:00–21:00 · 周一休 · Usera区', gmaps: 'https://maps.google.com/?cid=8309845266926584976' },
@@ -822,10 +826,10 @@
     { name: 'Castelados', label: 'Castelados 海鲜', dir: 'right', offset: [16, 0], emoji: '🦞', lat: 40.4207379, lng: -3.6790948, zone: 'retiro', rating: '4.6', meta: '西班牙海鲜餐厅 · 蒜香虾/朝鲜蓟 · 需预约', hours: '12:30–17:00, 20:00–24:00 · 周日休 · Retiro区', gmaps: 'https://maps.google.com/?cid=4053477595447366102' },
     { name: 'Quispe Madrid', label: 'Quispe 秘鲁菜', dir: 'top', offset: [0, -16], emoji: '🇵🇪', lat: 40.4215716, lng: -3.6880171, zone: 'salamanca', rating: '4.8', meta: '秘鲁菜 · 酸橘汁腌鱼/Pisco Sour · 需预约', hours: '13:30–17:00, 20:00–次日0:30 · Salamanca区', gmaps: 'https://maps.google.com/?cid=11410684589934597914' },
     { name: 'MOMOTTA (Fuenlabrada)', label: 'MOMOTTA 分店', dir: 'top', offset: [0, -16], emoji: '🧁', lat: 40.2610644, lng: -3.7438875, zone: 'suburb', rating: '4.8', meta: '甜品奶茶分店 · 芋泥/迷你泡芙/焦糖布丁', hours: '12:00–19:00 · 周六休 · Fuenlabrada郊区', gmaps: 'https://maps.google.com/?cid=1638586071795696295' },
-    { name: 'Hot Pot de Sichuan 四川火锅', label: '四川火锅', dir: 'left', offset: [-16, 0], emoji: '🌶️', lat: 40.4187499, lng: -3.7074797, zone: 'centro', rating: '4.6', meta: '正宗川式火锅 · 食材新鲜份量大', hours: '13:00–16:00, 19:00–23:30 · Centro区', gmaps: 'https://maps.google.com/?cid=11969297557503805685' },
-    { name: 'Restaurante de Sichuan 四川饭店', label: '四川饭店', dir: 'right', offset: [16, 0], emoji: '🥢', lat: 40.4194866, lng: -3.7009853, zone: 'centro', rating: '4.5', meta: '正宗川菜 · 蒜蓉虾/脆皮鸭 · 建议预约', hours: '13:00–16:30, 19:30–23:30 · Centro区', gmaps: 'https://maps.google.com/?cid=1837127183883903831' },
+    { name: 'Hot Pot de Sichuan 四川火锅', label: '四川火锅', dir: 'left', offset: [-22, 0], emoji: '🌶️', lat: 40.4187499, lng: -3.7074797, zone: 'centro', rating: '4.6', meta: '正宗川式火锅 · 食材新鲜份量大', hours: '13:00–16:00, 19:00–23:30 · Centro区', gmaps: 'https://maps.google.com/?cid=11969297557503805685' },
+    { name: 'Restaurante de Sichuan 四川饭店', label: '四川饭店', dir: 'right', offset: [22, 0], emoji: '🥢', lat: 40.4194866, lng: -3.7009853, zone: 'centro', rating: '4.5', meta: '正宗川菜 · 蒜蓉虾/脆皮鸭 · 建议预约', hours: '13:00–16:30, 19:30–23:30 · Centro区', gmaps: 'https://maps.google.com/?cid=1837127183883903831' },
     { name: '碳烤居 Tan Kao Ju', label: '碳烤居烧烤', dir: 'bottom', offset: [0, 16], emoji: '🍢', lat: 40.4127, lng: -3.7019, zone: 'centro', rating: '4.5', meta: '中式烧烤/烤串 · 推荐毛肚/五花肉 · 微辣可酱料分开 · 服务略慢', hours: '19:30 开门 · C. de Atocha 12 · Centro区', gmaps: 'https://www.google.com/maps/search/?api=1&query=%E7%A2%B3%E7%83%A4%E5%B1%85+Tan+Kao+Ju+Calle+de+Atocha+12+Madrid' },
-    { name: 'Izakaya Han', label: 'Izakaya Han 居酒屋', dir: 'top', offset: [0, -16], emoji: '🍣', lat: 40.4205, lng: -3.6985, zone: 'centro', rating: '4.5', meta: '日式居酒屋 · 三文鱼火炙卷/韩式炸鸡 · 人均20-30€', hours: '20:00 开门 · C. de San Bartolomé 10 · Centro区', gmaps: 'https://www.google.com/maps/search/?api=1&query=Izakaya+Han+Calle+de+San+Bartolome+10+Madrid' },
+    { name: 'Izakaya Han', label: 'Izakaya Han 居酒屋', dir: 'top', offset: [0, -22], emoji: '🍣', lat: 40.4205, lng: -3.6985, zone: 'centro', rating: '4.5', meta: '日式居酒屋 · 三文鱼火炙卷/韩式炸鸡 · 人均20-30€', hours: '20:00 开门 · C. de San Bartolomé 10 · Centro区', gmaps: 'https://www.google.com/maps/search/?api=1&query=Izakaya+Han+Calle+de+San+Bartolome+10+Madrid' },
   ];
 
   const ZONE_COLOR = { centro: '#EDAFB8', salamanca: '#8FAF8F', trip: '#5a8f6e', usera: '#E8A87C', retiro: '#C99FC4', suburb: '#9DB4C0' };
