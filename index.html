@@ -218,13 +218,8 @@
   .map-pop-rating { color: #e0a52e; font-weight: 600; }
   .map-pop-link { display: inline-block; margin-top: 6px; font-size: 12px; color: var(--accent); font-weight: 600; text-decoration: none; }
   .custom-marker { border-radius: 50%; border: 2.5px solid #fff; box-shadow: 0 2px 6px rgba(47,70,68,0.3); display: flex; align-items: center; justify-content: center; font-size: 14px; }
-  .map-name-label { background: var(--c-dark); border: none; border-radius: 7px; padding: 2px 8px; font-family: 'DM Sans','Noto Serif SC',sans-serif; font-size: 9.5px; font-weight: 600; color: #fff; box-shadow: 0 2px 8px rgba(47,70,68,0.35); white-space: nowrap; letter-spacing: 0.3px; }
-  /* 连接气泡到地标的小箭头/指针，四个方向 */
-  .map-name-label::before { display: block !important; border: 5px solid transparent; }
-  .leaflet-tooltip-top.map-name-label::before { border-top-color: var(--c-dark); }
-  .leaflet-tooltip-bottom.map-name-label::before { border-bottom-color: var(--c-dark); }
-  .leaflet-tooltip-left.map-name-label::before { border-left-color: var(--c-dark); }
-  .leaflet-tooltip-right.map-name-label::before { border-right-color: var(--c-dark); }
+  /* ── 自定义标签 + SVG连接线 ── */
+  .map-label-tag { position:absolute; background:rgba(255,255,255,0.85); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); border:1.5px solid #8FAF8F; border-radius:20px; padding:3px 10px; font-family:'DM Sans','Noto Serif SC',sans-serif; font-size:9.5px; font-weight:600; color:#2F4644; box-shadow:0 1px 6px rgba(47,70,68,0.10); white-space:nowrap; letter-spacing:0.3px; cursor:grab; pointer-events:auto; transform:translate(-50%,-50%); user-select:none; -webkit-user-select:none; }
 </style>
 </head>
 <body>
@@ -815,21 +810,21 @@
 
   // ── 美食地图 ──
   const FOOD_PLACES = [
-    { name: 'Liukoushui Ramen 流口水', label: '流口水小面', dir: 'left', offset: [-16, 0], emoji: '🍜', lat: 40.4236302, lng: -3.7092515, zone: 'centro', rating: '4.6', meta: '重庆小面/米线 · 份量大', hours: '12:30–16:30, 19:00–23:00', gmaps: 'https://maps.google.com/?cid=13952298006316524534' },
-    { name: '锦里 KOI TEA', label: '锦里 KOI 奶茶', dir: 'top', offset: [0, -22], emoji: '🧋', lat: 40.4246366, lng: -3.7016119, zone: 'centro', rating: '4.4', meta: '奶茶 · 刨冰甜品', hours: '13:30–22:30 · 周三休', gmaps: 'https://maps.google.com/?cid=2458676993244401857' },
-    { name: 'PURY JOKBAL 韩式猪蹄', label: 'PURY 韩式猪蹄', dir: 'left', offset: [-22, 0], emoji: '🐷', lat: 40.4192997, lng: -3.7075111, zone: 'centro', rating: '4.9', meta: '韩式猪蹄/菜包肉 · 需预约', hours: '13:00–16:00, 19:00–23:00 · 周日休', gmaps: 'https://maps.google.com/?cid=16611181408599730406' },
-    { name: 'HanSo Café', label: 'HanSo Café', dir: 'bottom', offset: [0, 22], emoji: '☕', lat: 40.4235109, lng: -3.7026311, zone: 'centro', rating: '4.3', meta: '网红咖啡 · 三明治甜点', hours: '9:00–20:00 · 常排队', gmaps: 'https://maps.google.com/?cid=4863409570507183551' },
-    { name: 'Yue Lai 火锅', label: 'Yue Lai 火锅', dir: 'top', offset: [0, -16], emoji: '🍲', lat: 40.4259375, lng: -3.6745047, zone: 'salamanca', rating: '4.5', meta: '性价比火锅 · 菜新鲜', hours: '12:30–16:30, 19:30–24:00 · 周二休', gmaps: 'https://maps.google.com/?cid=3130876169433569488' },
-    { name: 'Monasterio de Piedra', label: 'Monasterio de Piedra', dir: 'top', offset: [0, -16], emoji: '🏞️', lat: 41.1936567, lng: -1.7820453, zone: 'trip', rating: '4.7', meta: '石头修道院 · 25+瀑布 · 游览2-3h', hours: '9:00–19:00 · 免费停车 · 线上票€15.2', gmaps: 'https://maps.google.com/?cid=12814747786231315663' },
-    { name: 'MOMOTTA', label: 'MOMOTTA 甜品奶茶', dir: 'bottom', offset: [0, 16], emoji: '🧁', lat: 40.3852933, lng: -3.7067774, zone: 'usera', rating: '4.4', meta: '奶茶 · 蛋糕/泡芙（栗子、抹茶红豆）', hours: '14:00–21:00 · 周一休 · Usera区', gmaps: 'https://maps.google.com/?cid=8309845266926584976' },
-    { name: 'Sanchi Tea & Zazas', label: 'Sanchi 茶饮甜品', dir: 'top', offset: [0, -16], emoji: '🧋', lat: 40.385599, lng: -3.70621, zone: 'usera', rating: '4.7', meta: '珍珠奶茶 · 芝士奶盖。⚠️ 显示临时停业', hours: 'Usera区 · 去前先确认是否营业', gmaps: 'https://maps.google.com/?cid=12301582443098869155' },
-    { name: 'Castelados', label: 'Castelados 海鲜', dir: 'right', offset: [16, 0], emoji: '🦞', lat: 40.4207379, lng: -3.6790948, zone: 'retiro', rating: '4.6', meta: '西班牙海鲜餐厅 · 蒜香虾/朝鲜蓟 · 需预约', hours: '12:30–17:00, 20:00–24:00 · 周日休 · Retiro区', gmaps: 'https://maps.google.com/?cid=4053477595447366102' },
-    { name: 'Quispe Madrid', label: 'Quispe 秘鲁菜', dir: 'top', offset: [0, -16], emoji: '🇵🇪', lat: 40.4215716, lng: -3.6880171, zone: 'salamanca', rating: '4.8', meta: '秘鲁菜 · 酸橘汁腌鱼/Pisco Sour · 需预约', hours: '13:30–17:00, 20:00–次日0:30 · Salamanca区', gmaps: 'https://maps.google.com/?cid=11410684589934597914' },
-    { name: 'MOMOTTA (Fuenlabrada)', label: 'MOMOTTA 分店', dir: 'top', offset: [0, -16], emoji: '🧁', lat: 40.2610644, lng: -3.7438875, zone: 'suburb', rating: '4.8', meta: '甜品奶茶分店 · 芋泥/迷你泡芙/焦糖布丁', hours: '12:00–19:00 · 周六休 · Fuenlabrada郊区', gmaps: 'https://maps.google.com/?cid=1638586071795696295' },
-    { name: 'Hot Pot de Sichuan 四川火锅', label: '四川火锅', dir: 'left', offset: [-22, 0], emoji: '🌶️', lat: 40.4187499, lng: -3.7074797, zone: 'centro', rating: '4.6', meta: '正宗川式火锅 · 食材新鲜份量大', hours: '13:00–16:00, 19:00–23:30 · Centro区', gmaps: 'https://maps.google.com/?cid=11969297557503805685' },
-    { name: 'Restaurante de Sichuan 四川饭店', label: '四川饭店', dir: 'right', offset: [22, 0], emoji: '🥢', lat: 40.4194866, lng: -3.7009853, zone: 'centro', rating: '4.5', meta: '正宗川菜 · 蒜蓉虾/脆皮鸭 · 建议预约', hours: '13:00–16:30, 19:30–23:30 · Centro区', gmaps: 'https://maps.google.com/?cid=1837127183883903831' },
-    { name: '碳烤居 Tan Kao Ju', label: '碳烤居烧烤', dir: 'bottom', offset: [0, 16], emoji: '🍢', lat: 40.4127, lng: -3.7019, zone: 'centro', rating: '4.5', meta: '中式烧烤/烤串 · 推荐毛肚/五花肉 · 微辣可酱料分开 · 服务略慢', hours: '19:30 开门 · C. de Atocha 12 · Centro区', gmaps: 'https://www.google.com/maps/search/?api=1&query=%E7%A2%B3%E7%83%A4%E5%B1%85+Tan+Kao+Ju+Calle+de+Atocha+12+Madrid' },
-    { name: 'Izakaya Han', label: 'Izakaya Han 居酒屋', dir: 'top', offset: [0, -22], emoji: '🍣', lat: 40.4205, lng: -3.6985, zone: 'centro', rating: '4.5', meta: '日式居酒屋 · 三文鱼火炙卷/韩式炸鸡 · 人均20-30€', hours: '20:00 开门 · C. de San Bartolomé 10 · Centro区', gmaps: 'https://www.google.com/maps/search/?api=1&query=Izakaya+Han+Calle+de+San+Bartolome+10+Madrid' },
+    { name: 'Liukoushui Ramen 流口水', label: '流口水小面', offset: [-65, -20], emoji: '🍜', lat: 40.4236302, lng: -3.7092515, zone: 'centro', rating: '4.6', meta: '重庆小面/米线 · 份量大', hours: '12:30–16:30, 19:00–23:00', gmaps: 'https://maps.google.com/?cid=13952298006316524534' },
+    { name: '锦里 KOI TEA', label: '锦里 KOI 奶茶', offset: [-20, -60], emoji: '🧋', lat: 40.4246366, lng: -3.7016119, zone: 'centro', rating: '4.4', meta: '奶茶 · 刨冰甜品', hours: '13:30–22:30 · 周三休', gmaps: 'https://maps.google.com/?cid=2458676993244401857' },
+    { name: 'PURY JOKBAL 韩式猪蹄', label: 'PURY 韩式猪蹄', offset: [-70, 10], emoji: '🐷', lat: 40.4192997, lng: -3.7075111, zone: 'centro', rating: '4.9', meta: '韩式猪蹄/菜包肉 · 需预约', hours: '13:00–16:00, 19:00–23:00 · 周日休', gmaps: 'https://maps.google.com/?cid=16611181408599730406' },
+    { name: 'HanSo Café', label: 'HanSo Café', offset: [20, -60], emoji: '☕', lat: 40.4235109, lng: -3.7026311, zone: 'centro', rating: '4.3', meta: '网红咖啡 · 三明治甜点', hours: '9:00–20:00 · 常排队', gmaps: 'https://maps.google.com/?cid=4863409570507183551' },
+    { name: 'Yue Lai 火锅', label: 'Yue Lai 火锅', offset: [0, -55], emoji: '🍲', lat: 40.4259375, lng: -3.6745047, zone: 'salamanca', rating: '4.5', meta: '性价比火锅 · 菜新鲜', hours: '12:30–16:30, 19:30–24:00 · 周二休', gmaps: 'https://maps.google.com/?cid=3130876169433569488' },
+    { name: 'Monasterio de Piedra', label: 'Monasterio de Piedra', offset: [0, -55], emoji: '🏞️', lat: 41.1936567, lng: -1.7820453, zone: 'trip', rating: '4.7', meta: '石头修道院 · 25+瀑布 · 游览2-3h', hours: '9:00–19:00 · 免费停车 · 线上票€15.2', gmaps: 'https://maps.google.com/?cid=12814747786231315663' },
+    { name: 'MOMOTTA', label: 'MOMOTTA 甜品奶茶', offset: [0, 55], emoji: '🧁', lat: 40.3852933, lng: -3.7067774, zone: 'usera', rating: '4.4', meta: '奶茶 · 蛋糕/泡芙（栗子、抹茶红豆）', hours: '14:00–21:00 · 周一休 · Usera区', gmaps: 'https://maps.google.com/?cid=8309845266926584976' },
+    { name: 'Sanchi Tea & Zazas', label: 'Sanchi 茶饮甜品', offset: [0, -55], emoji: '🧋', lat: 40.385599, lng: -3.70621, zone: 'usera', rating: '4.7', meta: '珍珠奶茶 · 芝士奶盖。⚠️ 显示临时停业', hours: 'Usera区 · 去前先确认是否营业', gmaps: 'https://maps.google.com/?cid=12301582443098869155' },
+    { name: 'Castelados', label: 'Castelados 海鲜', offset: [65, 0], emoji: '🦞', lat: 40.4207379, lng: -3.6790948, zone: 'retiro', rating: '4.6', meta: '西班牙海鲜餐厅 · 蒜香虾/朝鲜蓟 · 需预约', hours: '12:30–17:00, 20:00–24:00 · 周日休 · Retiro区', gmaps: 'https://maps.google.com/?cid=4053477595447366102' },
+    { name: 'Quispe Madrid', label: 'Quispe 秘鲁菜', offset: [0, -55], emoji: '🇵🇪', lat: 40.4215716, lng: -3.6880171, zone: 'salamanca', rating: '4.8', meta: '秘鲁菜 · 酸橘汁腌鱼/Pisco Sour · 需预约', hours: '13:30–17:00, 20:00–次日0:30 · Salamanca区', gmaps: 'https://maps.google.com/?cid=11410684589934597914' },
+    { name: 'MOMOTTA (Fuenlabrada)', label: 'MOMOTTA 分店', offset: [0, -55], emoji: '🧁', lat: 40.2610644, lng: -3.7438875, zone: 'suburb', rating: '4.8', meta: '甜品奶茶分店 · 芋泥/迷你泡芙/焦糖布丁', hours: '12:00–19:00 · 周六休 · Fuenlabrada郊区', gmaps: 'https://maps.google.com/?cid=1638586071795696295' },
+    { name: 'Hot Pot de Sichuan 四川火锅', label: '四川火锅', offset: [-65, 25], emoji: '🌶️', lat: 40.4187499, lng: -3.7074797, zone: 'centro', rating: '4.6', meta: '正宗川式火锅 · 食材新鲜份量大', hours: '13:00–16:00, 19:00–23:30 · Centro区', gmaps: 'https://maps.google.com/?cid=11969297557503805685' },
+    { name: 'Restaurante de Sichuan 四川饭店', label: '四川饭店', offset: [55, 25], emoji: '🥢', lat: 40.4194866, lng: -3.7009853, zone: 'centro', rating: '4.5', meta: '正宗川菜 · 蒜蓉虾/脆皮鸭 · 建议预约', hours: '13:00–16:30, 19:30–23:30 · Centro区', gmaps: 'https://maps.google.com/?cid=1837127183883903831' },
+    { name: '碳烤居 Tan Kao Ju', label: '碳烤居烧烤', offset: [0, 60], emoji: '🍢', lat: 40.4127, lng: -3.7019, zone: 'centro', rating: '4.5', meta: '中式烧烤/烤串 · 推荐毛肚/五花肉 · 微辣可酱料分开 · 服务略慢', hours: '19:30 开门 · C. de Atocha 12 · Centro区', gmaps: 'https://www.google.com/maps/search/?api=1&query=%E7%A2%B3%E7%83%A4%E5%B1%85+Tan+Kao+Ju+Calle+de+Atocha+12+Madrid' },
+    { name: 'Izakaya Han', label: 'Izakaya Han 居酒屋', offset: [55, -30], emoji: '🍣', lat: 40.4205, lng: -3.6985, zone: 'centro', rating: '4.5', meta: '日式居酒屋 · 三文鱼火炙卷/韩式炸鸡 · 人均20-30€', hours: '20:00 开门 · C. de San Bartolomé 10 · Centro区', gmaps: 'https://www.google.com/maps/search/?api=1&query=Izakaya+Han+Calle+de+San+Bartolome+10+Madrid' },
   ];
 
   const ZONE_COLOR = { centro: '#EDAFB8', salamanca: '#8FAF8F', trip: '#5a8f6e', usera: '#E8A87C', retiro: '#C99FC4', suburb: '#9DB4C0' };
@@ -840,28 +835,165 @@
       attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 19,
     }).addTo(map);
 
-    const markers = [];
+    const LINE_COLOR = 'rgba(47,70,68,0.4)';
+    const LINE_W = 1.5;
+    const MARKER_R = 15;
+
+    // 标签容器挂在地图容器上（不跟随 overlayPane 平移）
+    const mapContainer = map.getContainer();
+    const labelContainer = document.createElement('div');
+    labelContainer.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:700;overflow:hidden;';
+    mapContainer.appendChild(labelContainer);
+
+    const items = []; // { marker, tag, line, svg, off:[dx,dy] }
+
+    // ── 画连接线 ──
+    function drawLine(item) {
+      const { marker, tag, line, off } = item;
+      const pt = map.latLngToContainerPoint(marker.getLatLng());
+      const mx = pt.x, my = pt.y;
+      const lx = mx + off[0], ly = my + off[1];
+
+      // 方向向量
+      const dx = off[0], dy = off[1];
+      const len = Math.sqrt(dx*dx + dy*dy) || 1;
+      const nx = dx/len, ny = dy/len;
+
+      // 起点：标记圆边缘
+      const x1 = mx + nx * MARKER_R;
+      const y1 = my + ny * MARKER_R;
+
+      // 终点：标签矩形边缘
+      const tw = (tag.offsetWidth  || 56) / 2;
+      const th = (tag.offsetHeight || 20) / 2;
+      const absDx = Math.abs(nx), absDy = Math.abs(ny);
+      let tEdge;
+      if      (absDx < 1e-6) tEdge = th / absDy;
+      else if (absDy < 1e-6) tEdge = tw / absDx;
+      else                   tEdge = Math.min(tw / absDx, th / absDy);
+      const x2 = lx - nx * tEdge;
+      const y2 = ly - ny * tEdge;
+
+      line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+      line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+      tag.style.left = lx + 'px';
+      tag.style.top  = ly + 'px';
+    }
+
+    function updateAll() { items.forEach(drawLine); }
+
+    // ── 拖拽逻辑（鼠标 + 触摸） ──
+    function makeDraggable(item) {
+      const { tag } = item;
+      let dragging = false, startX, startY, startOff;
+
+      function onStart(ex, ey) {
+        dragging = true;
+        startX = ex; startY = ey;
+        startOff = [...item.off];
+        map.dragging.disable();
+        tag.style.cursor = 'grabbing';
+        tag.style.zIndex = 10;
+      }
+      function onMove(ex, ey) {
+        if (!dragging) return;
+        item.off[0] = startOff[0] + (ex - startX);
+        item.off[1] = startOff[1] + (ey - startY);
+        drawLine(item);
+      }
+      function onEnd() {
+        if (!dragging) return;
+        dragging = false;
+        map.dragging.enable();
+        tag.style.cursor = 'grab';
+        tag.style.zIndex = '';
+        try { localStorage.setItem(item.storageKey, JSON.stringify(item.off)); } catch(e) {}
+      }
+
+      // 鼠标事件
+      tag.addEventListener('mousedown', e => {
+        e.stopPropagation();
+        onStart(e.clientX, e.clientY);
+        const mm = e2 => onMove(e2.clientX, e2.clientY);
+        const mu = ()  => { onEnd(); window.removeEventListener('mousemove', mm); window.removeEventListener('mouseup', mu); };
+        window.addEventListener('mousemove', mm);
+        window.addEventListener('mouseup', mu);
+      });
+
+      // 触摸事件（手机）
+      tag.addEventListener('touchstart', e => {
+        e.stopPropagation();
+        const t = e.touches[0];
+        onStart(t.clientX, t.clientY);
+      }, { passive: true });
+      tag.addEventListener('touchmove', e => {
+        e.stopPropagation(); e.preventDefault();
+        const t = e.touches[0];
+        onMove(t.clientX, t.clientY);
+      }, { passive: false });
+      tag.addEventListener('touchend', e => {
+        e.stopPropagation();
+        onEnd();
+      });
+    }
+
+    // ── 创建每个地点的标签 ──
     FOOD_PLACES.forEach(p => {
       const color = ZONE_COLOR[p.zone];
       const icon = L.divIcon({
-        className: '', html: `<div class="custom-marker" style="width:30px;height:30px;background:${color};">${p.emoji}</div>`,
-        iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -16],
+        className: '',
+        html: `<div class="custom-marker" style="width:30px;height:30px;background:${color};">${p.emoji}</div>`,
+        iconSize: [30,30], iconAnchor: [15,15], popupAnchor: [0,-40],
       });
       const m = L.marker([p.lat, p.lng], { icon }).addTo(map);
-      m.bindTooltip(p.label || p.name, { permanent: true, direction: p.dir || 'top', offset: p.offset || [0, -16], className: 'map-name-label' });
       m.bindPopup(`
         <div class="map-pop-title">${p.emoji} ${p.name}</div>
         <div class="map-pop-meta"><span class="map-pop-rating">★ ${p.rating}</span> · ${p.meta}</div>
         <div class="map-pop-meta">🕐 ${p.hours}</div>
         <a class="map-pop-link" href="${p.gmaps}" target="_blank">在 Google Maps 打开 →</a>
       `);
-      markers.push(m);
+
+      // SVG 线（整张地图大小，绝对定位）
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;';
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('stroke', LINE_COLOR);
+      line.setAttribute('stroke-width', LINE_W);
+      line.setAttribute('stroke-linecap', 'round');
+      svg.appendChild(line);
+      labelContainer.appendChild(svg);
+
+      // 标签
+      const tag = document.createElement('div');
+      tag.className = 'map-label-tag';
+      tag.textContent = p.label || p.name;
+      tag.style.cursor = 'grab';
+      // 点击（非拖拽）打开 popup
+      let moved = false;
+      tag.addEventListener('mousedown', () => { moved = false; });
+      tag.addEventListener('mousemove', () => { moved = true; });
+      tag.addEventListener('mouseup',   () => { if (!moved) m.openPopup(); });
+      tag.addEventListener('touchend',  (e) => { if (!moved) { e.preventDefault(); m.openPopup(); } });
+      labelContainer.appendChild(tag);
+
+      const storageKey = 'label_off_' + (p.name).replace(/\s/g,'_');
+      let savedOff = null;
+      try { const s = localStorage.getItem(storageKey); if (s) savedOff = JSON.parse(s); } catch(e) {}
+      const item = { marker: m, tag, line, svg, off: savedOff || [...(p.offset || [0, -55])], storageKey };
+      items.push(item);
+      makeDraggable(item);
     });
 
-    // 自适应显示马德里核心市区的点（排除较远的 Monasterio 和 Fuenlabrada 分店）
-    const cityMarkers = markers.filter((_, i) => !['trip','suburb'].includes(FOOD_PLACES[i].zone));
-    const grp = L.featureGroup(cityMarkers);
-    map.fitBounds(grp.getBounds().pad(0.35));
+    map.on('zoom move zoomend moveend viewreset', updateAll);
+    setTimeout(updateAll, 80);
+
+    // 自适应视图
+    const cityM = items
+      .filter(({ marker }, i) => !['trip','suburb'].includes(FOOD_PLACES[i].zone))
+      .map(({ marker }) => marker);
+    const grp = L.featureGroup(cityM);
+    map.fitBounds(grp.getBounds().pad(0.35), { animate: false });
+    setTimeout(updateAll, 250);
   }
 
   loadAll();
