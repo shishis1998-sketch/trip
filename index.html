@@ -839,6 +839,38 @@
     const LINE_W = 1.5;
     const MARKER_R = 15;
 
+    // 根据 zoom 计算标签缩放比例（基准 zoom=14）
+    function getLabelScale() {
+      const z = map.getZoom();
+      // zoom 14 = 1.0，每差1级乘以0.75，最小0.45，最大1.2
+      return Math.min(1.2, Math.max(0.45, Math.pow(0.75, 14 - z)));
+    }
+
+    function applyLabelScale() {
+      const s = getLabelScale();
+      const sz = Math.round(30 * s); // marker 尺寸（像素，整数）
+      const half = sz / 2;
+      items.forEach(({ tag, marker, mEl }) => {
+        // 标签缩放
+        tag.style.fontSize    = (9.5 * s).toFixed(1) + 'px';
+        tag.style.padding     = (3 * s).toFixed(1) + 'px ' + (10 * s).toFixed(1) + 'px';
+        tag.style.borderRadius = (20 * s).toFixed(1) + 'px';
+        // marker 圆缩放（直接改 DOM + iconAnchor）
+        const el = marker.getElement()?.querySelector('.custom-marker');
+        if (el) {
+          el.style.width    = sz + 'px';
+          el.style.height   = sz + 'px';
+          el.style.fontSize = Math.round(14 * s) + 'px';
+        }
+        // 同步 Leaflet iconAnchor，避免点位偏移
+        marker.setIcon(L.divIcon({
+          className: '',
+          html: marker.getElement()?.innerHTML || '',
+          iconSize: [sz, sz], iconAnchor: [half, half], popupAnchor: [0, -half - 8],
+        }));
+      });
+    }
+
     // 标签容器挂在地图容器上（不跟随 overlayPane 平移）
     const mapContainer = map.getContainer();
     const labelContainer = document.createElement('div');
@@ -880,7 +912,7 @@
       tag.style.top  = ly + 'px';
     }
 
-    function updateAll() { items.forEach(drawLine); }
+    function updateAll() { applyLabelScale(); items.forEach(drawLine); }
 
     // ── 拖拽逻辑（鼠标 + 触摸） ──
     function makeDraggable(item) {
@@ -940,12 +972,17 @@
     // ── 创建每个地点的标签 ──
     FOOD_PLACES.forEach(p => {
       const color = ZONE_COLOR[p.zone];
+      const markerDiv = document.createElement('div');
+      markerDiv.className = 'custom-marker';
+      markerDiv.style.cssText = `width:30px;height:30px;background:${color};font-size:14px;`;
+      markerDiv.textContent = p.emoji;
       const icon = L.divIcon({
-        className: '',
-        html: `<div class="custom-marker" style="width:30px;height:30px;background:${color};">${p.emoji}</div>`,
+        className: '', html: markerDiv.outerHTML,
         iconSize: [30,30], iconAnchor: [15,15], popupAnchor: [0,-40],
       });
       const m = L.marker([p.lat, p.lng], { icon }).addTo(map);
+      // 拿到实际挂在DOM里的div
+      const mEl = m.getElement()?.querySelector('.custom-marker') || null;
       m.bindPopup(`
         <div class="map-pop-title">${p.emoji} ${p.name}</div>
         <div class="map-pop-meta"><span class="map-pop-rating">★ ${p.rating}</span> · ${p.meta}</div>
@@ -979,7 +1016,7 @@
       const storageKey = 'label_off_' + (p.name).replace(/\s/g,'_');
       let savedOff = null;
       try { const s = localStorage.getItem(storageKey); if (s) savedOff = JSON.parse(s); } catch(e) {}
-      const item = { marker: m, tag, line, svg, off: savedOff || [...(p.offset || [0, -55])], storageKey };
+      const item = { marker: m, mEl, tag, line, svg, off: savedOff || [...(p.offset || [0, -55])], storageKey, color };
       items.push(item);
       makeDraggable(item);
     });
