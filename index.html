@@ -217,9 +217,9 @@
   .map-pop-meta { font-size: 12px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 3px; }
   .map-pop-rating { color: #e0a52e; font-weight: 600; }
   .map-pop-link { display: inline-block; margin-top: 6px; font-size: 12px; color: var(--accent); font-weight: 600; text-decoration: none; }
-  .custom-marker { border-radius: 50%; border: 2.5px solid #fff; box-shadow: 0 2px 6px rgba(47,70,68,0.3); display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .custom-marker { border-radius: 50%; border: 2.5px solid #fff; box-shadow: 0 2px 6px rgba(47,70,68,0.3); display: flex; align-items: center; justify-content: center; font-size: 14px; transition: width 0.25s ease, height 0.25s ease, font-size 0.25s ease; }
   /* ── 自定义标签 + SVG连接线 ── */
-  .map-label-tag { position:absolute; background:rgba(255,255,255,0.85); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); border:1.5px solid #8FAF8F; border-radius:20px; padding:3px 10px; font-family:'DM Sans','Noto Serif SC',sans-serif; font-size:9.5px; font-weight:600; color:#2F4644; box-shadow:0 1px 6px rgba(47,70,68,0.10); white-space:nowrap; letter-spacing:0.3px; cursor:grab; pointer-events:auto; transform:translate(-50%,-50%); user-select:none; -webkit-user-select:none; }
+  .map-label-tag { position:absolute; background:rgba(255,255,255,0.85); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); border:1.5px solid #8FAF8F; border-radius:20px; padding:3px 10px; font-family:'DM Sans','Noto Serif SC',sans-serif; font-size:9.5px; font-weight:600; color:#2F4644; box-shadow:0 1px 6px rgba(47,70,68,0.10); white-space:nowrap; letter-spacing:0.3px; cursor:grab; pointer-events:auto; transform:translate(-50%,-50%); user-select:none; -webkit-user-select:none; transition: font-size 0.25s ease, padding 0.25s ease, border-radius 0.25s ease, left 0.1s ease, top 0.1s ease; }
 </style>
 </head>
 <body>
@@ -811,6 +811,7 @@
   // ── 美食地图 ──
   const FOOD_PLACES = [
     { name: 'Liukoushui Ramen 流口水', label: '流口水小面', offset: [-65, -20], emoji: '🍜', lat: 40.4236302, lng: -3.7092515, zone: 'centro', rating: '4.6', meta: '重庆小面/米线 · 份量大', hours: '12:30–16:30, 19:00–23:00', gmaps: 'https://maps.google.com/?cid=13952298006316524534' },
+    { name: 'Restaurante Chino Datang 大唐', label: '大唐烧烤', offset: [-60, 30], emoji: '🍖', lat: 40.4234976, lng: -3.7077069, zone: 'centro', rating: '4.4', meta: '东北菜/烧烤 · 撸串/地锅鸡 · 人均10-20€', hours: '12:00–23:30 · 周二休 · C. Antonio Grilo 4', gmaps: 'https://www.google.com/maps/place/?q=place_id:ChIJR6qvxeUpQg0Rm5wc5drEagQ' },
     { name: '锦里 KOI TEA', label: '锦里 KOI 奶茶', offset: [-20, -60], emoji: '🧋', lat: 40.4246366, lng: -3.7016119, zone: 'centro', rating: '4.4', meta: '奶茶 · 刨冰甜品', hours: '13:30–22:30 · 周三休', gmaps: 'https://maps.google.com/?cid=2458676993244401857' },
     { name: 'PURY JOKBAL 韩式猪蹄', label: 'PURY 韩式猪蹄', offset: [-70, 10], emoji: '🐷', lat: 40.4192997, lng: -3.7075111, zone: 'centro', rating: '4.9', meta: '韩式猪蹄/菜包肉 · 需预约', hours: '13:00–16:00, 19:00–23:00 · 周日休', gmaps: 'https://maps.google.com/?cid=16611181408599730406' },
     { name: 'HanSo Café', label: 'HanSo Café', offset: [20, -60], emoji: '☕', lat: 40.4235109, lng: -3.7026311, zone: 'centro', rating: '4.3', meta: '网红咖啡 · 三明治甜点', hours: '9:00–20:00 · 常排队', gmaps: 'https://maps.google.com/?cid=4863409570507183551' },
@@ -830,7 +831,7 @@
   const ZONE_COLOR = { centro: '#EDAFB8', salamanca: '#8FAF8F', trip: '#5a8f6e', usera: '#E8A87C', retiro: '#C99FC4', suburb: '#9DB4C0' };
 
   function initMap() {
-    const map = L.map('food-map', { scrollWheelZoom: false }).setView([40.424, -3.703], 14);
+    const map = L.map('food-map', { scrollWheelZoom: false, zoomDelta: 0.5, zoomSnap: 0.5 }).setView([40.424, -3.703], 14);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 19,
     }).addTo(map);
@@ -848,26 +849,19 @@
 
     function applyLabelScale() {
       const s = getLabelScale();
-      const sz = Math.round(30 * s); // marker 尺寸（像素，整数）
-      const half = sz / 2;
-      items.forEach(({ tag, marker, mEl }) => {
+      const sz = Math.round(30 * s);
+      items.forEach(({ tag, marker }) => {
         // 标签缩放
-        tag.style.fontSize    = (9.5 * s).toFixed(1) + 'px';
-        tag.style.padding     = (3 * s).toFixed(1) + 'px ' + (10 * s).toFixed(1) + 'px';
+        tag.style.fontSize     = (9.5 * s).toFixed(1) + 'px';
+        tag.style.padding      = (3 * s).toFixed(1) + 'px ' + (10 * s).toFixed(1) + 'px';
         tag.style.borderRadius = (20 * s).toFixed(1) + 'px';
-        // marker 圆缩放（直接改 DOM + iconAnchor）
+        // marker 圆缩放（直接改 DOM，保留 transition）
         const el = marker.getElement()?.querySelector('.custom-marker');
         if (el) {
           el.style.width    = sz + 'px';
           el.style.height   = sz + 'px';
           el.style.fontSize = Math.round(14 * s) + 'px';
         }
-        // 同步 Leaflet iconAnchor，避免点位偏移
-        marker.setIcon(L.divIcon({
-          className: '',
-          html: marker.getElement()?.innerHTML || '',
-          iconSize: [sz, sz], iconAnchor: [half, half], popupAnchor: [0, -half - 8],
-        }));
       });
     }
 
@@ -884,10 +878,14 @@
       const { marker, tag, line, off } = item;
       const pt = map.latLngToContainerPoint(marker.getLatLng());
       const mx = pt.x, my = pt.y;
-      const lx = mx + off[0], ly = my + off[1];
+
+      // off 是基准 zoom14 的像素偏移，乘以 scale 得到当前实际偏移
+      const s = getLabelScale();
+      const sox = off[0] * s, soy = off[1] * s;
+      const lx = mx + sox, ly = my + soy;
 
       // 方向向量
-      const dx = off[0], dy = off[1];
+      const dx = sox, dy = soy;
       const len = Math.sqrt(dx*dx + dy*dy) || 1;
       const nx = dx/len, ny = dy/len;
 
@@ -926,11 +924,14 @@
         map.dragging.disable();
         tag.style.cursor = 'grabbing';
         tag.style.zIndex = 10;
+        tag.style.transition = 'none'; // 拖拽时关掉过渡，避免延迟感
       }
       function onMove(ex, ey) {
         if (!dragging) return;
-        item.off[0] = startOff[0] + (ex - startX);
-        item.off[1] = startOff[1] + (ey - startY);
+        const s = getLabelScale();
+        // 鼠标移动量换算回基准坐标
+        item.off[0] = startOff[0] + (ex - startX) / s;
+        item.off[1] = startOff[1] + (ey - startY) / s;
         drawLine(item);
       }
       function onEnd() {
@@ -939,6 +940,7 @@
         map.dragging.enable();
         tag.style.cursor = 'grab';
         tag.style.zIndex = '';
+        tag.style.transition = ''; // 恢复过渡
         try { localStorage.setItem(item.storageKey, JSON.stringify(item.off)); } catch(e) {}
       }
 
