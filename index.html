@@ -221,21 +221,6 @@
   .map-name-label { background: rgba(255,255,255,0.95); border: 1px solid var(--glass-border); border-radius: 6px; padding: 1px 5px; font-family: 'DM Sans','Noto Serif SC',sans-serif; font-size: 9px; font-weight: 600; color: var(--g1); box-shadow: 0 1px 4px rgba(47,70,68,0.12); white-space: nowrap; }
   .map-name-label::before { display: none; }
   .leaflet-tooltip-top.map-name-label::before { border-top-color: rgba(255,255,255,0.95); display: block; }
-
-  /* 美食管理 */
-  .food-add-bar { padding: 10px; background: rgba(255,255,255,0.92); border-top: 1px solid var(--glass-border); }
-  .food-add-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; background: rgba(143,175,143,0.08); border: 1px dashed rgba(143,175,143,0.45); border-radius: 12px; padding: 10px; font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--accent); cursor: pointer; transition: all 0.2s; letter-spacing: 1px; }
-  .food-add-btn:hover { background: rgba(143,175,143,0.15); }
-  .map-pop-actions { display: flex; gap: 12px; margin-top: 8px; border-top: 1px solid rgba(47,70,68,0.08); padding-top: 7px; }
-  .map-pop-actions button { background: none; border: none; cursor: pointer; font-size: 11px; letter-spacing: 1px; color: rgba(47,70,68,0.5); padding: 0; font-family: 'DM Sans', sans-serif; }
-  .map-pop-actions .pop-edit:hover { color: var(--accent); }
-  .map-pop-actions .pop-del:hover { color: #c97a7a; }
-  .coord-hint { font-size: 11px; color: var(--text-secondary); line-height: 1.5; margin-top: -4px; margin-bottom: 10px; }
-  .coord-extract-btn { width: 100%; background: rgba(143,175,143,0.12); border: 1px solid rgba(143,175,143,0.4); border-radius: 10px; padding: 9px; font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--accent); cursor: pointer; margin-bottom: 4px; letter-spacing: 0.5px; }
-  .zone-picker { display: flex; flex-wrap: wrap; gap: 7px; }
-  .zone-opt { display: flex; align-items: center; gap: 5px; font-size: 12px; padding: 6px 11px; border-radius: 20px; border: 1px solid rgba(47,70,68,0.14); background: #f7f5f3; cursor: pointer; color: var(--text-secondary); user-select: none; }
-  .zone-opt i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-  .zone-opt.sel { border-color: var(--accent); background: #fff; color: var(--text-primary); font-weight: 500; }
 </style>
 </head>
 <body>
@@ -329,9 +314,6 @@
       <span class="legend-item"><i class="dot-usera"></i> Usera</span>
       <span class="legend-item"><i class="dot-suburb"></i> 郊区</span>
       <span class="legend-item"><i class="dot-trip"></i> 出游</span>
-    </div>
-    <div class="food-add-bar">
-      <button class="food-add-btn" onclick="openFoodModal()"><span class="add-plus">+</span> 添加美食</button>
     </div>
   </div>
 
@@ -447,77 +429,6 @@
   </div>
 </div>
 
-<!-- 美食 Modal -->
-<div class="modal-overlay" id="food-modal">
-  <div class="modal">
-    <div class="modal-top">
-      <div class="modal-title" id="food-modal-title">添加美食</div>
-      <button class="modal-close" onclick="closeFoodModal()">✕</button>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">名称（全称）</label>
-        <input class="form-input" id="fd-name" placeholder="如：Yue Lai 火锅">
-      </div>
-      <div class="form-group">
-        <label class="form-label">图标 emoji</label>
-        <input class="form-input" id="fd-emoji" placeholder="🍲" style="font-size:20px; text-align:center;">
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">地图显示短名（选填）</label>
-      <input class="form-input" id="fd-label" placeholder="留空则用名称">
-    </div>
-    <div class="form-group">
-      <label class="form-label">分区（颜色）</label>
-      <div class="zone-picker" id="fd-zone-picker"></div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Google 地图链接</label>
-      <input class="form-input" id="fd-gmaps" placeholder="粘贴 Google Maps 分享链接">
-      <button class="coord-extract-btn" type="button" onclick="extractCoords()" style="margin-top:8px;">📍 从上方链接提取坐标</button>
-      <div class="coord-hint" id="fd-coord-hint">提示：在 Google 地图长按地点 → 复制坐标，或粘贴含坐标的链接后点上面按钮。</div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">纬度 lat</label>
-        <input class="form-input" id="fd-lat" placeholder="40.4259" inputmode="decimal">
-      </div>
-      <div class="form-group">
-        <label class="form-label">经度 lng</label>
-        <input class="form-input" id="fd-lng" placeholder="-3.6745" inputmode="decimal">
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">评分（选填）</label>
-        <input class="form-input" id="fd-rating" placeholder="4.5" inputmode="decimal">
-      </div>
-      <div class="form-group">
-        <label class="form-label">标签方向</label>
-        <select class="form-select" id="fd-dir">
-          <option value="top">上方</option>
-          <option value="bottom">下方</option>
-          <option value="left">左侧</option>
-          <option value="right">右侧</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">简介（选填）</label>
-      <input class="form-input" id="fd-meta" placeholder="如：性价比火锅 · 菜新鲜">
-    </div>
-    <div class="form-group">
-      <label class="form-label">营业时间（选填）</label>
-      <input class="form-input" id="fd-hours" placeholder="如：12:30–16:30, 19:30–24:00 · 周二休">
-    </div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeFoodModal()">取消</button>
-      <button class="btn-save" id="food-save-btn" onclick="saveFood()">添加 ✓</button>
-    </div>
-  </div>
-</div>
-
 <script>
   const DAYS = [
     { day: '18', label: '6月18日', sub: '抵达 · 周边' },
@@ -582,10 +493,8 @@
         activities = data.activities || [];
         collapsed = data.collapsed || {};
         notes = data.notes || [];
-        if (Array.isArray(data.places)) places = data.places;
         renderAll();
         renderNotes();
-        refreshMap();
         if (showTip) cloudTip('✓ 已从云端拉取最新数据', 'ok');
         setCloudStatus('☁ 云端已同步', 'ok');
         return true;
@@ -608,7 +517,7 @@
       const res = await fetch(`https://api.github.com/gists/${c.gistId}`, {
         method: 'PATCH',
         headers: { Authorization: `token ${c.token}`, Accept: 'application/vnd.github+json' },
-        body: JSON.stringify({ files: { [CLOUD_FILE]: { content: JSON.stringify({ activities, collapsed, notes, places }, null, 2) } } }),
+        body: JSON.stringify({ files: { [CLOUD_FILE]: { content: JSON.stringify({ activities, collapsed, notes }, null, 2) } } }),
       });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       setCloudStatus('☁ 云端已同步 · ' + new Date().toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'}), 'ok');
@@ -627,12 +536,10 @@
       activities = data.activities || [];
       collapsed = data.collapsed || {};
       notes = data.notes || [];
-      places = Array.isArray(data.places) ? data.places : JSON.parse(JSON.stringify(DEFAULT_FOOD_PLACES));
     } else {
       activities = JSON.parse(JSON.stringify(DEFAULT_ACTIVITIES));
       collapsed = {};
       notes = [...DEFAULT_NOTES];
-      places = JSON.parse(JSON.stringify(DEFAULT_FOOD_PLACES));
     }
     renderAll();
     renderNotes();
@@ -646,7 +553,7 @@
   }
 
   async function saveAll() {
-    localStorage.setItem('tripData_v3', JSON.stringify({ activities, collapsed, notes, places }));
+    localStorage.setItem('tripData_v3', JSON.stringify({ activities, collapsed, notes }));
     const tip = document.getElementById('saveTip');
     tip.textContent = '✓ 已保存到本地';
     if (hasCloud()) {
@@ -900,11 +807,10 @@
     renderAll();
   }
 
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeNoteModal(); closeCloudModal(); closeFoodModal(); } });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeNoteModal(); closeCloudModal(); } });
 
   // ── 美食地图 ──
-  let places = [];
-  const DEFAULT_FOOD_PLACES = [
+  const FOOD_PLACES = [
     { name: 'Liukoushui Ramen 流口水', label: '流口水小面', dir: 'left', offset: [-16, 0], emoji: '🍜', lat: 40.4236302, lng: -3.7092515, zone: 'centro', rating: '4.6', meta: '重庆小面/米线 · 份量大', hours: '12:30–16:30, 19:00–23:00', gmaps: 'https://maps.google.com/?cid=13952298006316524534' },
     { name: '锦里 KOI TEA', label: '锦里 KOI 奶茶', dir: 'top', offset: [0, -16], emoji: '🧋', lat: 40.4246366, lng: -3.7016119, zone: 'centro', rating: '4.4', meta: '奶茶 · 刨冰甜品', hours: '13:30–22:30 · 周三休', gmaps: 'https://maps.google.com/?cid=2458676993244401857' },
     { name: 'PURY JOKBAL 韩式猪蹄', label: 'PURY 韩式猪蹄', dir: 'bottom', offset: [0, 16], emoji: '🐷', lat: 40.4192997, lng: -3.7075111, zone: 'centro', rating: '4.9', meta: '韩式猪蹄/菜包肉 · 需预约', hours: '13:00–16:00, 19:00–23:00 · 周日休', gmaps: 'https://maps.google.com/?cid=16611181408599730406' },
@@ -921,183 +827,35 @@
   ];
 
   const ZONE_COLOR = { centro: '#EDAFB8', salamanca: '#8FAF8F', trip: '#5a8f6e', usera: '#E8A87C', retiro: '#C99FC4', suburb: '#9DB4C0' };
-  const ZONE_LABELS = [
-    { key: 'centro', name: 'Centro' },
-    { key: 'salamanca', name: 'Salamanca' },
-    { key: 'retiro', name: 'Retiro' },
-    { key: 'usera', name: 'Usera' },
-    { key: 'suburb', name: '郊区' },
-    { key: 'trip', name: '出游' },
-  ];
-
-  let foodMap = null;
-  let markersLayer = null;
-
-  function offsetForDir(dir) {
-    return { top: [0, -16], bottom: [0, 16], left: [-16, 0], right: [16, 0] }[dir] || [0, -16];
-  }
 
   function initMap() {
-    foodMap = L.map('food-map', { scrollWheelZoom: false }).setView([40.424, -3.703], 14);
+    const map = L.map('food-map', { scrollWheelZoom: false }).setView([40.424, -3.703], 14);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 19,
-    }).addTo(foodMap);
-    markersLayer = L.layerGroup().addTo(foodMap);
-    refreshMap(true);
-  }
+    }).addTo(map);
 
-  function refreshMap(doFit) {
-    if (!foodMap || !markersLayer) return;
-    markersLayer.clearLayers();
-    const cityMarkers = [];
-    places.forEach((p, idx) => {
-      if (typeof p.lat !== 'number' || typeof p.lng !== 'number') return;
-      const color = ZONE_COLOR[p.zone] || '#9DB4C0';
+    const markers = [];
+    FOOD_PLACES.forEach(p => {
+      const color = ZONE_COLOR[p.zone];
       const icon = L.divIcon({
-        className: '', html: `<div class="custom-marker" style="width:30px;height:30px;background:${color};">${p.emoji || '📍'}</div>`,
+        className: '', html: `<div class="custom-marker" style="width:30px;height:30px;background:${color};">${p.emoji}</div>`,
         iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -16],
       });
-      const m = L.marker([p.lat, p.lng], { icon }).addTo(markersLayer);
-      m.bindTooltip(p.label || p.name, { permanent: true, direction: p.dir || 'top', offset: p.offset || offsetForDir(p.dir), className: 'map-name-label' });
-      const ratingHtml = p.rating ? `<span class="map-pop-rating">★ ${p.rating}</span>${p.meta ? ' · ' : ''}` : '';
-      const gmapsHtml = p.gmaps ? `<a class="map-pop-link" href="${p.gmaps}" target="_blank">在 Google Maps 打开 →</a>` : '';
+      const m = L.marker([p.lat, p.lng], { icon }).addTo(map);
+      m.bindTooltip(p.label || p.name, { permanent: true, direction: p.dir || 'top', offset: p.offset || [0, -16], className: 'map-name-label' });
       m.bindPopup(`
-        <div class="map-pop-title">${p.emoji || '📍'} ${escapeHtml(p.name || '')}</div>
-        ${(p.rating || p.meta) ? `<div class="map-pop-meta">${ratingHtml}${escapeHtml(p.meta || '')}</div>` : ''}
-        ${p.hours ? `<div class="map-pop-meta">🕐 ${escapeHtml(p.hours)}</div>` : ''}
-        ${gmapsHtml}
-        <div class="map-pop-actions">
-          <button class="pop-edit" onclick="openFoodModal(${idx})">编辑</button>
-          <button class="pop-del" onclick="deleteFood(${idx})">删除</button>
-        </div>
+        <div class="map-pop-title">${p.emoji} ${p.name}</div>
+        <div class="map-pop-meta"><span class="map-pop-rating">★ ${p.rating}</span> · ${p.meta}</div>
+        <div class="map-pop-meta">🕐 ${p.hours}</div>
+        <a class="map-pop-link" href="${p.gmaps}" target="_blank">在 Google Maps 打开 →</a>
       `);
-      if (!['trip','suburb'].includes(p.zone)) cityMarkers.push(m);
+      markers.push(m);
     });
-    if (doFit && cityMarkers.length) {
-      const grp = L.featureGroup(cityMarkers);
-      foodMap.fitBounds(grp.getBounds().pad(0.35));
-    }
-  }
 
-  // ── 美食增删改 ──
-  let editingFood = null;
-
-  function renderZonePicker(selected) {
-    const wrap = document.getElementById('fd-zone-picker');
-    wrap.innerHTML = '';
-    ZONE_LABELS.forEach(z => {
-      const el = document.createElement('div');
-      el.className = 'zone-opt' + (z.key === selected ? ' sel' : '');
-      el.dataset.zone = z.key;
-      el.innerHTML = `<i style="background:${ZONE_COLOR[z.key]}"></i>${z.name}`;
-      el.onclick = () => {
-        wrap.querySelectorAll('.zone-opt').forEach(o => o.classList.remove('sel'));
-        el.classList.add('sel');
-      };
-      wrap.appendChild(el);
-    });
-  }
-  function selectedZone() {
-    const sel = document.querySelector('#fd-zone-picker .zone-opt.sel');
-    return sel ? sel.dataset.zone : 'centro';
-  }
-
-  function openFoodModal(idx) {
-    editingFood = (typeof idx === 'number') ? idx : null;
-    const titleEl = document.getElementById('food-modal-title');
-    const btn = document.getElementById('food-save-btn');
-    const g = id => document.getElementById(id);
-    if (editingFood !== null) {
-      const p = places[editingFood];
-      titleEl.textContent = '编辑美食';
-      btn.textContent = '保存修改 ✓';
-      g('fd-name').value = p.name || '';
-      g('fd-emoji').value = p.emoji || '';
-      g('fd-label').value = (p.label && p.label !== p.name) ? p.label : '';
-      g('fd-gmaps').value = p.gmaps || '';
-      g('fd-lat').value = (typeof p.lat === 'number') ? p.lat : '';
-      g('fd-lng').value = (typeof p.lng === 'number') ? p.lng : '';
-      g('fd-rating').value = p.rating || '';
-      g('fd-dir').value = p.dir || 'top';
-      g('fd-meta').value = p.meta || '';
-      g('fd-hours').value = p.hours || '';
-      renderZonePicker(p.zone || 'centro');
-    } else {
-      titleEl.textContent = '添加美食';
-      btn.textContent = '添加 ✓';
-      ['fd-name','fd-emoji','fd-label','fd-gmaps','fd-lat','fd-lng','fd-rating','fd-meta','fd-hours'].forEach(id => g(id).value = '');
-      g('fd-dir').value = 'top';
-      renderZonePicker('centro');
-    }
-    document.getElementById('fd-coord-hint').textContent = '提示：在 Google 地图长按地点 → 复制坐标，或粘贴含坐标的链接后点上面按钮。';
-    document.getElementById('food-modal').classList.add('open');
-  }
-  function closeFoodModal() {
-    document.getElementById('food-modal').classList.remove('open');
-    editingFood = null;
-  }
-
-  // 从 Google 链接 / 坐标串里提取经纬度
-  function extractCoords() {
-    const raw = document.getElementById('fd-gmaps').value.trim();
-    const hint = document.getElementById('fd-coord-hint');
-    if (!raw) { hint.textContent = '⚠ 请先粘贴链接或坐标。'; hint.style.color = '#c97a7a'; return; }
-    // 优先匹配 @lat,lng（地图URL）；其次 !3dlat!4dlng；最后纯 "lat, lng"
-    let lat = null, lng = null;
-    let m = raw.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-    if (!m) m = raw.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
-    if (!m) m = raw.match(/(-?\d{1,3}\.\d{4,}),\s*(-?\d{1,3}\.\d{4,})/);
-    if (m) { lat = m[1]; lng = m[2]; }
-    if (lat && lng) {
-      document.getElementById('fd-lat').value = lat;
-      document.getElementById('fd-lng').value = lng;
-      hint.textContent = '✓ 已提取坐标：' + lat + ', ' + lng;
-      hint.style.color = 'var(--accent)';
-    } else {
-      hint.textContent = '✗ 没在链接里找到坐标。请用含 @纬度,经度 的地图网址，或长按地点复制坐标后手动填入。';
-      hint.style.color = '#c97a7a';
-    }
-  }
-
-  function saveFood() {
-    const g = id => document.getElementById(id).value.trim();
-    const name = g('fd-name');
-    if (!name) { document.getElementById('fd-name').focus(); return; }
-    const lat = parseFloat(g('fd-lat'));
-    const lng = parseFloat(g('fd-lng'));
-    if (isNaN(lat) || isNaN(lng)) {
-      const hint = document.getElementById('fd-coord-hint');
-      hint.textContent = '⚠ 请填写有效的经纬度（地图上需要坐标才能定位）。';
-      hint.style.color = '#c97a7a';
-      return;
-    }
-    const dir = document.getElementById('fd-dir').value;
-    const data = {
-      name,
-      label: g('fd-label') || name,
-      emoji: g('fd-emoji') || '📍',
-      zone: selectedZone(),
-      lat, lng,
-      dir,
-      offset: offsetForDir(dir),
-      rating: g('fd-rating'),
-      meta: g('fd-meta'),
-      hours: g('fd-hours'),
-      gmaps: g('fd-gmaps'),
-    };
-    if (editingFood !== null) {
-      places[editingFood] = data;
-    } else {
-      places.push(data);
-    }
-    closeFoodModal();
-    refreshMap(false);
-  }
-
-  function deleteFood(idx) {
-    if (!confirm('确认删除「' + (places[idx] && places[idx].name) + '」？')) return;
-    places.splice(idx, 1);
-    refreshMap(false);
+    // 自适应显示马德里核心市区的点（排除较远的 Monasterio 和 Fuenlabrada 分店）
+    const cityMarkers = markers.filter((_, i) => !['trip','suburb'].includes(FOOD_PLACES[i].zone));
+    const grp = L.featureGroup(cityMarkers);
+    map.fitBounds(grp.getBounds().pad(0.35));
   }
 
   loadAll();
