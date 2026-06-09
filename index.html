@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.6/Sortable.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -111,7 +112,13 @@
   .day-group.collapsed .day-body { max-height: 0; opacity: 0; }
 
   /* Activity card */
-  .activity-card { display: flex; gap: 12px; align-items: center; padding-right: 36px; }
+  .activity-card { display: flex; gap: 10px; align-items: center; padding-right: 36px; }
+  .drag-handle { flex-shrink: 0; align-self: stretch; display: flex; align-items: center; justify-content: center; width: 22px; margin: -11px 0 -11px -4px; color: rgba(47,70,68,0.28); font-size: 16px; line-height: 1; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; transition: color 0.2s; }
+  .drag-handle:hover { color: var(--accent); }
+  .drag-handle:active { cursor: grabbing; }
+  .sortable-ghost { opacity: 0.4; }
+  .sortable-chosen { box-shadow: 0 6px 22px rgba(47,70,68,0.18); }
+  .sortable-drag { opacity: 0.95; }
   .activity-icon { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; border: 1px solid var(--glass-border); }
   .icon-green { background: rgba(143,175,143,0.15); }
   .icon-pink { background: rgba(237,175,184,0.18); }
@@ -687,10 +694,11 @@
               ${a.ticket2 ? `<span class="ticket-tag alt">${a.ticket2}</span>` : ''}
             </div>` : '';
           bodyHtml += `
-            <div class="glass-card checkable">
+            <div class="glass-card checkable" data-id="${a.id}" data-day="${d.day}">
               <input type="checkbox" class="card-check" id="${a.id}" ${a.checked ? 'checked' : ''} onchange="toggleCheck('${a.id}', this.checked)">
               <label class="check-label" for="${a.id}"></label>
               <div class="activity-card">
+                <span class="drag-handle" title="按住拖动排序">⠿</span>
                 <div class="activity-content">
                   <div class="act-title">${a.title}</div>
                   <div class="act-desc">${a.desc}</div>
@@ -716,10 +724,53 @@
           <span class="day-count">${dayActs.length} 项</span>
           <div class="day-chevron"></div>
         </div>
-        <div class="day-body">${bodyHtml}</div>
+        <div class="day-body" data-day="${d.day}">${bodyHtml}</div>
       `;
       list.appendChild(group);
     });
+
+    initSortables();
+  }
+
+  // ── 同一天内自由拖拽排序 ──
+  let sortableInstances = [];
+  function initSortables() {
+    // 清理旧实例，避免重复绑定
+    sortableInstances.forEach(s => { try { s.destroy(); } catch (e) {} });
+    sortableInstances = [];
+    if (typeof Sortable === 'undefined') return; // CDN 未加载时静默降级
+
+    document.querySelectorAll('.day-body').forEach(body => {
+      const inst = Sortable.create(body, {
+        handle: '.drag-handle',
+        draggable: '.checkable',
+        animation: 160,
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        dragClass: 'sortable-drag',
+        onEnd: () => applyDayOrder(body.dataset.day),
+      });
+      sortableInstances.push(inst);
+    });
+  }
+
+  // 按 DOM 中的新顺序，重排该天的行程，其余天保持不变
+  function applyDayOrder(day) {
+    const body = document.querySelector(`.day-body[data-day="${day}"]`);
+    if (!body) return;
+    const orderedIds = [...body.querySelectorAll('.checkable')].map(el => el.dataset.id);
+    const reordered = orderedIds
+      .map(id => activities.find(a => a.id === id))
+      .filter(Boolean);
+    let i = 0;
+    activities = activities.map(a => (a.day === day ? reordered[i++] : a));
+    // 与新增/编辑/删除一致：更新内存，提示用户保存以持久化
+    const tip = document.getElementById('saveTip');
+    if (tip) {
+      tip.textContent = '已调整顺序，记得点「保存行程」';
+      clearTimeout(applyDayOrder._t);
+      applyDayOrder._t = setTimeout(() => { tip.textContent = ''; }, 3000);
+    }
   }
 
   function toggleDay(day) {
