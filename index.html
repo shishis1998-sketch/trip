@@ -454,6 +454,7 @@
   let activities = [];
   let collapsed = {}; // 记录每天展开收起状态
   let notes = [];
+  let hasRendered = false; // 首次渲染后置 true，用于只在首屏播放入场动画
 
   const DEFAULT_NOTES = [
     '18号是否需要请假，等确认后再定',
@@ -679,8 +680,9 @@
       const isCollapsed = collapsed[d.day] || false;
 
       const group = document.createElement('div');
-      group.className = 'day-group fade-in' + (isCollapsed ? ' collapsed' : '');
-      group.style.animationDelay = (di * 0.06) + 's';
+      // 入场动画只在首次加载播放；之后的重渲染（拖放/增删改/展开收起）不再重放，避免跳动闪烁
+      group.className = 'day-group' + (hasRendered ? '' : ' fade-in') + (isCollapsed ? ' collapsed' : '');
+      if (!hasRendered) group.style.animationDelay = (di * 0.06) + 's';
 
       // 卡片体
       let bodyHtml = '';
@@ -730,6 +732,7 @@
     });
 
     initSortables();
+    hasRendered = true;
   }
 
   // ── 拖拽排序：同一天内排序 + 跨日期移动 ──
