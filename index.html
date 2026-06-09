@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.6/Sortable.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -111,7 +112,13 @@
   .day-group.collapsed .day-body { max-height: 0; opacity: 0; }
 
   /* Activity card */
-  .activity-card { display: flex; gap: 12px; align-items: center; padding-right: 36px; }
+  .activity-card { display: flex; gap: 10px; align-items: center; padding-right: 36px; }
+  .drag-handle { flex-shrink: 0; align-self: stretch; display: flex; align-items: center; justify-content: center; width: 22px; margin: -11px 0 -11px -4px; color: rgba(47,70,68,0.28); font-size: 16px; line-height: 1; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; transition: color 0.2s; }
+  .drag-handle:hover { color: var(--accent); }
+  .drag-handle:active { cursor: grabbing; }
+  .sortable-ghost { opacity: 0.4; }
+  .sortable-chosen { box-shadow: 0 6px 22px rgba(47,70,68,0.18); }
+  .sortable-drag { opacity: 0.95; }
   .activity-icon { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; border: 1px solid var(--glass-border); }
   .icon-green { background: rgba(143,175,143,0.15); }
   .icon-pink { background: rgba(237,175,184,0.18); }
@@ -687,10 +694,11 @@
               ${a.ticket2 ? `<span class="ticket-tag alt">${a.ticket2}</span>` : ''}
             </div>` : '';
           bodyHtml += `
-            <div class="glass-card checkable">
+            <div class="glass-card checkable" data-id="${a.id}" data-day="${d.day}">
               <input type="checkbox" class="card-check" id="${a.id}" ${a.checked ? 'checked' : ''} onchange="toggleCheck('${a.id}', this.checked)">
               <label class="check-label" for="${a.id}"></label>
               <div class="activity-card">
+                <span class="drag-handle" title="按住拖动排序，可拖到其他日期">⠿</span>
                 <div class="activity-content">
                   <div class="act-title">${a.title}</div>
                   <div class="act-desc">${a.desc}</div>
@@ -716,10 +724,85 @@
           <span class="day-count">${dayActs.length} 项</span>
           <div class="day-chevron"></div>
         </div>
-        <div class="day-body">${bodyHtml}</div>
+        <div class="day-body" data-day="${d.day}">${bodyHtml}</div>
       `;
       list.appendChild(group);
     });
+
+    initSortables();
+  }
+
+  // ── 拖拽排序：同一天内排序 + 跨日期移动 ──
+  let sortableInstances = [];
+  function initSortables() {
+    // 清理旧实例，避免重复绑定
+    sortableInstances.forEach(s => { try { s.destroy(); } catch (e) {} });
+    sortableInstances = [];
+    if (typeof Sortable === 'undefined') return; // CDN 未加载时静默降级
+
+    document.querySelectorAll('.day-body').forEach(body => {
+      const inst = Sortable.create(body, {
+        group: 'itinerary',        // 共享分组：允许把卡片拖到别的日期
+        handle: '.drag-handle',
+        draggable: '.checkable',
+        animation: 160,
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        dragClass: 'sortable-drag',
+        onStart: dragStart,
+        onEnd: dragEnd,
+      });
+      sortableInstances.push(inst);
+    });
+  }
+
+  // 拖拽时悬停到「收起日期」的标题栏，自动展开使其成为可用落点
+  function dragHoverHandler(e) {
+    const x = e.touches ? e.touches[0].clientX : e.clientX;
+    const y = e.touches ? e.touches[0].clientY : e.clientY;
+    if (x == null || y == null) return;
+    document.querySelectorAll('.day-group.collapsed').forEach(group => {
+      const header = group.querySelector('.day-header');
+      const body = group.querySelector('.day-body');
+      if (!header || !body) return;
+      const r = header.getBoundingClientRect();
+      if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
+        collapsed[body.dataset.day] = false;   // 仅切换 class，不重渲染，避免打断拖拽
+        group.classList.remove('collapsed');
+      }
+    });
+  }
+  function dragStart() {
+    document.addEventListener('dragover', dragHoverHandler);
+    document.addEventListener('touchmove', dragHoverHandler, { passive: true });
+  }
+  function dragEnd() {
+    document.removeEventListener('dragover', dragHoverHandler);
+    document.removeEventListener('touchmove', dragHoverHandler);
+    rebuildFromDOM();
+  }
+
+  // 拖放结束后，按各天 DOM 的新顺序重建 activities，并把卡片归属到所在日期
+  function rebuildFromDOM() {
+    const newOrder = [];
+    // querySelectorAll 按文档顺序返回，与 DAYS 顺序一致
+    document.querySelectorAll('.day-body').forEach(body => {
+      const day = body.dataset.day;
+      body.querySelectorAll('.checkable').forEach(el => {
+        const a = activities.find(x => x.id === el.dataset.id);
+        if (a) { a.day = day; newOrder.push(a); }   // 跨日期时更新归属日
+      });
+    });
+    activities = newOrder;
+    // 重渲染以刷新「X 项」计数和"暂无安排"占位（延迟到 Sortable 收尾之后）
+    setTimeout(renderAll, 0);
+    // 与新增/编辑/删除一致：更新内存，提示用户保存以持久化
+    const tip = document.getElementById('saveTip');
+    if (tip) {
+      tip.textContent = '已调整顺序，记得点「保存行程」';
+      clearTimeout(rebuildFromDOM._t);
+      rebuildFromDOM._t = setTimeout(() => { tip.textContent = ''; }, 3000);
+    }
   }
 
   function toggleDay(day) {
