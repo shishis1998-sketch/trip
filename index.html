@@ -698,7 +698,7 @@
               <input type="checkbox" class="card-check" id="${a.id}" ${a.checked ? 'checked' : ''} onchange="toggleCheck('${a.id}', this.checked)">
               <label class="check-label" for="${a.id}"></label>
               <div class="activity-card">
-                <span class="drag-handle" title="按住拖动排序">⠿</span>
+                <span class="drag-handle" title="按住拖动排序，可拖到其他日期">⠿</span>
                 <div class="activity-content">
                   <div class="act-title">${a.title}</div>
                   <div class="act-desc">${a.desc}</div>
@@ -732,7 +732,7 @@
     initSortables();
   }
 
-  // ── 同一天内自由拖拽排序 ──
+  // ── 拖拽排序：同一天内排序 + 跨日期移动 ──
   let sortableInstances = [];
   function initSortables() {
     // 清理旧实例，避免重复绑定
@@ -742,34 +742,39 @@
 
     document.querySelectorAll('.day-body').forEach(body => {
       const inst = Sortable.create(body, {
+        group: 'itinerary',        // 共享分组：允许把卡片拖到别的日期
         handle: '.drag-handle',
         draggable: '.checkable',
         animation: 160,
         ghostClass: 'sortable-ghost',
         chosenClass: 'sortable-chosen',
         dragClass: 'sortable-drag',
-        onEnd: () => applyDayOrder(body.dataset.day),
+        onEnd: rebuildFromDOM,
       });
       sortableInstances.push(inst);
     });
   }
 
-  // 按 DOM 中的新顺序，重排该天的行程，其余天保持不变
-  function applyDayOrder(day) {
-    const body = document.querySelector(`.day-body[data-day="${day}"]`);
-    if (!body) return;
-    const orderedIds = [...body.querySelectorAll('.checkable')].map(el => el.dataset.id);
-    const reordered = orderedIds
-      .map(id => activities.find(a => a.id === id))
-      .filter(Boolean);
-    let i = 0;
-    activities = activities.map(a => (a.day === day ? reordered[i++] : a));
+  // 拖放结束后，按各天 DOM 的新顺序重建 activities，并把卡片归属到所在日期
+  function rebuildFromDOM() {
+    const newOrder = [];
+    // querySelectorAll 按文档顺序返回，与 DAYS 顺序一致
+    document.querySelectorAll('.day-body').forEach(body => {
+      const day = body.dataset.day;
+      body.querySelectorAll('.checkable').forEach(el => {
+        const a = activities.find(x => x.id === el.dataset.id);
+        if (a) { a.day = day; newOrder.push(a); }   // 跨日期时更新归属日
+      });
+    });
+    activities = newOrder;
+    // 重渲染以刷新「X 项」计数和"暂无安排"占位（延迟到 Sortable 收尾之后）
+    setTimeout(renderAll, 0);
     // 与新增/编辑/删除一致：更新内存，提示用户保存以持久化
     const tip = document.getElementById('saveTip');
     if (tip) {
       tip.textContent = '已调整顺序，记得点「保存行程」';
-      clearTimeout(applyDayOrder._t);
-      applyDayOrder._t = setTimeout(() => { tip.textContent = ''; }, 3000);
+      clearTimeout(rebuildFromDOM._t);
+      rebuildFromDOM._t = setTimeout(() => { tip.textContent = ''; }, 3000);
     }
   }
 
