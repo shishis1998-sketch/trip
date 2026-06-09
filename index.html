@@ -749,10 +749,37 @@
         ghostClass: 'sortable-ghost',
         chosenClass: 'sortable-chosen',
         dragClass: 'sortable-drag',
-        onEnd: rebuildFromDOM,
+        onStart: dragStart,
+        onEnd: dragEnd,
       });
       sortableInstances.push(inst);
     });
+  }
+
+  // 拖拽时悬停到「收起日期」的标题栏，自动展开使其成为可用落点
+  function dragHoverHandler(e) {
+    const x = e.touches ? e.touches[0].clientX : e.clientX;
+    const y = e.touches ? e.touches[0].clientY : e.clientY;
+    if (x == null || y == null) return;
+    document.querySelectorAll('.day-group.collapsed').forEach(group => {
+      const header = group.querySelector('.day-header');
+      const body = group.querySelector('.day-body');
+      if (!header || !body) return;
+      const r = header.getBoundingClientRect();
+      if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
+        collapsed[body.dataset.day] = false;   // 仅切换 class，不重渲染，避免打断拖拽
+        group.classList.remove('collapsed');
+      }
+    });
+  }
+  function dragStart() {
+    document.addEventListener('dragover', dragHoverHandler);
+    document.addEventListener('touchmove', dragHoverHandler, { passive: true });
+  }
+  function dragEnd() {
+    document.removeEventListener('dragover', dragHoverHandler);
+    document.removeEventListener('touchmove', dragHoverHandler);
+    rebuildFromDOM();
   }
 
   // 拖放结束后，按各天 DOM 的新顺序重建 activities，并把卡片归属到所在日期
