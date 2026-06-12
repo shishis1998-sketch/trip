@@ -98,12 +98,8 @@
   .day-group { margin-bottom: 22px; }
   .day-header { display: flex; align-items: center; gap: 12px; padding: 6px 4px 12px; cursor: pointer; user-select: none; border-bottom: 1.5px solid rgba(143,175,143,0.30); margin-bottom: 12px; transition: all 0.2s; }
   .day-header:active { opacity: 0.7; }
-  .day-num { display: flex; align-items: baseline; gap: 4px; flex-shrink: 0; }
-  .day-num .d { font-family: 'Noto Serif SC', serif; font-size: 30px; font-weight: 600; color: var(--g1); line-height: 1; }
-  .day-num .m { font-size: 11px; letter-spacing: 1px; color: var(--accent); font-weight: 600; }
-  .day-title { flex: 1; }
-  .day-title .dt-main { font-family: 'Noto Serif SC', serif; font-size: 14px; color: var(--text-primary); font-weight: 600; }
-  .day-title .dt-sub { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+  .day-title { flex: 1; display: flex; align-items: baseline; gap: 8px; }
+  .day-title .dt-main { font-family: 'Noto Serif SC', serif; font-size: 22px; color: var(--text-primary); font-weight: 600; line-height: 1; }
   .day-count { font-size: 11px; color: var(--accent); background: rgba(143,175,143,0.15); border: 1px solid rgba(143,175,143,0.3); border-radius: 20px; padding: 3px 9px; font-weight: 500; margin-right: 2px; }
   .day-chevron { width: 18px; height: 18px; position: relative; flex-shrink: 0; transition: transform 0.3s ease; }
   .day-chevron::before { content: ''; position: absolute; top: 3px; left: 4px; width: 8px; height: 8px; border-right: 2px solid var(--accent); border-bottom: 2px solid var(--accent); transform: rotate(45deg); }
@@ -124,7 +120,7 @@
   .icon-pink { background: rgba(237,175,184,0.18); }
   .icon-peach { background: rgba(249,228,212,0.50); }
   .activity-content { flex: 1; padding-right: 4px; padding-bottom: 14px; }
-  .dt-week { font-size: 12px; color: var(--accent); font-weight: 600; margin-left: 4px; }
+  .dt-week { font-size: 12px; color: var(--accent); font-weight: 500; margin-left: 2px; }
   .act-title { font-family: 'Noto Serif SC', serif; font-size: 15px; color: var(--text-primary); margin-bottom: 2px; font-weight: 400; }
   .act-desc { font-size: 11.5px; color: rgba(30,50,46,0.65); line-height: 1.45; }
   .act-meta { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; align-items: center; }
@@ -713,7 +709,6 @@
 
       group.innerHTML = `
         <div class="day-header" onclick="toggleDay('${d.day}')">
-          <div class="day-num"><div class="d">${d.day}</div><div class="m">JUN</div></div>
           <div class="day-title">
             <div class="dt-main">${d.label}${d.week ? ` <span class="dt-week">${d.week}</span>` : ''}</div>
           </div>
