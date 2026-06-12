@@ -134,7 +134,7 @@
 
   /* Checkbox */
   .card-check { display: none; }
-  .check-label { position: absolute; top: 50%; right: 16px; transform: translateY(-50%); width: 24px; height: 24px; border-radius: 50%; border: 2px solid rgba(143,175,143,0.5); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.25s ease; background: white; flex-shrink: 0; }
+  .check-label { position: absolute; top: 12px; right: 14px; width: 24px; height: 24px; border-radius: 50%; border: 2px solid rgba(143,175,143,0.5); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.25s ease; background: white; flex-shrink: 0; }
   .check-label::after { content: ''; opacity: 0; transition: all 0.2s ease; width: 6px; height: 10px; border-right: 2.5px solid white; border-bottom: 2.5px solid white; transform: rotate(45deg) translate(-1px,-1px); display: block; }
   .card-check:checked + .check-label { background: var(--accent); border-color: var(--accent); }
   .card-check:checked + .check-label::after { opacity: 1; }
@@ -144,7 +144,7 @@
   .checkable:has(.card-check:checked) { opacity: 0.7; }
 
   /* Delete btn */
-  .card-actions { position: absolute; bottom: 6px; right: 52px; display: flex; gap: 18px; }
+  .card-actions { position: absolute; bottom: 8px; right: 12px; display: flex; gap: 18px; }
   .mini-btn { font-size: 10px; color: rgba(47,70,68,0.35); background: none; border: none; cursor: pointer; letter-spacing: 1px; padding: 4px 8px; }
   .edit-btn:hover { color: var(--accent); }
   .delete-btn:hover { color: #c97a7a; }
