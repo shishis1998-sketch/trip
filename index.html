@@ -786,7 +786,7 @@
     // querySelectorAll 按文档顺序返回，与 DAYS 顺序一致
     document.querySelectorAll('.day-body').forEach(body => {
       const day = body.dataset.day;
-      body.querySelectorAll('.checkable').forEach(el => {
+      body.querySelectorAll('.glass-card').forEach(el => {
         const a = activities.find(x => x.id === el.dataset.id);
         if (a) { a.day = day; newOrder.push(a); }   // 跨日期时更新归属日
       });
