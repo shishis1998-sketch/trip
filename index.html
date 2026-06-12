@@ -967,7 +967,11 @@
     }
 
     // 标签容器挂在地图容器上（不跟随 overlayPane 平移）
+    // 线层（底）和标签层（顶）分开，避免后续地点的线覆盖前面地点的标签
     const mapContainer = map.getContainer();
+    const lineContainer = document.createElement('div');
+    lineContainer.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:650;overflow:hidden;';
+    mapContainer.appendChild(lineContainer);
     const labelContainer = document.createElement('div');
     labelContainer.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:700;overflow:hidden;';
     mapContainer.appendChild(labelContainer);
@@ -1113,7 +1117,7 @@
       line.setAttribute('stroke-width', LINE_W);
       line.setAttribute('stroke-linecap', 'round');
       svg.appendChild(line);
-      labelContainer.appendChild(svg);
+      lineContainer.appendChild(svg);
 
       // 标签
       const tag = document.createElement('div');
