@@ -112,7 +112,7 @@
   .day-group.collapsed .day-body { max-height: 0; opacity: 0; }
 
   /* Activity card */
-  .activity-card { display: flex; gap: 10px; align-items: center; padding-right: 36px; }
+  .activity-card { display: flex; gap: 10px; align-items: center; }
   .drag-handle { flex-shrink: 0; align-self: stretch; display: flex; align-items: center; justify-content: center; width: 22px; margin: -11px 0 -11px -4px; color: rgba(47,70,68,0.28); font-size: 16px; line-height: 1; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; transition: color 0.2s; }
   .drag-handle:hover { color: var(--accent); }
   .drag-handle:active { cursor: grabbing; }
@@ -132,16 +132,12 @@
   .ticket-tag { font-size: 11px; color: var(--g1); background: rgba(237,175,184,0.20); border: 1px solid rgba(237,175,184,0.45); padding: 3px 10px; border-radius: 20px; font-weight: 500; }
   .ticket-tag.alt { background: rgba(232,228,220,0.50); border: 1px solid rgba(47,70,68,0.15); color: var(--text-secondary); }
 
-  /* Checkbox */
-  .card-check { display: none; }
-  .check-label { position: absolute; top: 12px; right: 14px; width: 24px; height: 24px; border-radius: 50%; border: 2px solid rgba(143,175,143,0.5); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.25s ease; background: white; flex-shrink: 0; }
-  .check-label::after { content: ''; opacity: 0; transition: all 0.2s ease; width: 6px; height: 10px; border-right: 2.5px solid white; border-bottom: 2.5px solid white; transform: rotate(45deg) translate(-1px,-1px); display: block; }
-  .card-check:checked + .check-label { background: var(--accent); border-color: var(--accent); }
-  .card-check:checked + .check-label::after { opacity: 1; }
-  .card-check:checked ~ .activity-card .act-title { text-decoration: line-through; opacity: 0.45; }
-  .card-check:checked ~ .activity-card .act-desc { opacity: 0.4; }
-  .card-check:checked ~ .activity-card .act-meta { opacity: 0.4; }
-  .checkable:has(.card-check:checked) { opacity: 0.7; }
+  /* Done state */
+  .glass-card.done { opacity: 0.7; }
+  .glass-card.done .act-title { text-decoration: line-through; opacity: 0.45; }
+  .glass-card.done .act-desc { opacity: 0.4; }
+  .glass-card.done .act-meta { opacity: 0.4; }
+  .done-btn.done-active { color: var(--accent); }
 
   /* Delete btn */
   .card-actions { position: absolute; bottom: 8px; right: 12px; display: flex; gap: 18px; }
@@ -696,9 +692,7 @@
               ${a.ticket2 ? `<span class="ticket-tag alt">${a.ticket2}</span>` : ''}
             </div>` : '';
           bodyHtml += `
-            <div class="glass-card checkable" data-id="${a.id}" data-day="${d.day}">
-              <input type="checkbox" class="card-check" id="${a.id}" ${a.checked ? 'checked' : ''} onchange="toggleCheck('${a.id}', this.checked)">
-              <label class="check-label" for="${a.id}"></label>
+            <div class="glass-card ${a.checked ? 'done' : ''}" data-id="${a.id}" data-day="${d.day}">
               <div class="activity-card">
                 <span class="drag-handle" title="按住拖动排序，可拖到其他日期">⠿</span>
                 <div class="activity-content">
@@ -709,6 +703,7 @@
                 </div>
               </div>
               <div class="card-actions">
+                <button class="mini-btn done-btn ${a.checked ? 'done-active' : ''}" onclick="toggleCheck('${a.id}', this)">完成</button>
                 <button class="mini-btn edit-btn" onclick="openModal('${a.id}')">编辑</button>
                 <button class="mini-btn delete-btn" onclick="deleteActivity('${a.id}')">删除</button>
               </div>
@@ -813,9 +808,13 @@
     renderAll();
   }
 
-  function toggleCheck(id, val) {
+  function toggleCheck(id, btn) {
     const a = activities.find(x => x.id === id);
-    if (a) a.checked = val;
+    if (!a) return;
+    a.checked = !a.checked;
+    const card = btn.closest('.glass-card');
+    card.classList.toggle('done', a.checked);
+    btn.classList.toggle('done-active', a.checked);
   }
 
   function deleteActivity(id) {
